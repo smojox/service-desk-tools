@@ -20,6 +20,11 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          // Skip MongoDB connection during build
+          if (process.env.NODE_ENV !== 'production' && !process.env.MONGODB_URI) {
+            return null
+          }
+
           // Find user by email
           const user = await UserModel.findByEmail(credentials.email as string)
           
