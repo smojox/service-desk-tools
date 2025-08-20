@@ -7,6 +7,18 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
     error: "/login",
   },
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Always redirect to /tools after successful login
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/tools`
+      }
+      // Allow relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allow callback URLs on the same origin
+      if (new URL(url).origin === baseUrl) return url
+      return `${baseUrl}/tools`
+    },
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -59,6 +71,17 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Always redirect to /tools after successful login
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/tools`
+      }
+      // Allow relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allow callback URLs on the same origin
+      if (new URL(url).origin === baseUrl) return url
+      return `${baseUrl}/tools`
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
