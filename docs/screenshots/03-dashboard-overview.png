@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:0.9" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="100%" height="100%" fill="url(#headerGradient)"/>
+    
+    <!-- Header -->
+    <rect x="0" y="0" width="100%" height="80" fill="rgba(44, 62, 80, 0.9)"/>
+    <text x="30" y="50" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Service Desk Analytics</text>
+    
+    <!-- Title -->
+    <text x="50" y="130" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#2c3e50">Dashboard Overview</text>
+    <text x="50" y="155" font-family="Arial, sans-serif" font-size="14" fill="#7f8c8d">Complete dashboard with metrics, charts, and data sections</text>
+    
+    <rect x="50" y="180" width="1100" height="60" fill="rgba(52, 152, 219, 0.8)" rx="5"/>
+    <text x="70" y="205" font-family="Arial, sans-serif" font-size="12" fill="white">SDM: All</text>
+    <text x="200" y="205" font-family="Arial, sans-serif" font-size="12" fill="white">Company: All</text>
+    <text x="350" y="205" font-family="Arial, sans-serif" font-size="12" fill="white">Date: Last 6 Months</text>
+    <text x="950" y="205" font-family="Arial, sans-serif" font-size="12" fill="white">PDF | Excel | AI</text>
+    <rect x="50" y="260" width="200" height="120" fill="url(#cardGradient)" rx="8" stroke="#e9ecef"/>
+    <text x="70" y="285" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">Total Tickets</text>
+    <text x="70" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2c3e50">1,247</text>
+    <rect x="270" y="260" width="200" height="120" fill="url(#cardGradient)" rx="8" stroke="#e9ecef"/>
+    <text x="290" y="285" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">Open Tickets</text>
+    <text x="290" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#e74c3c">89</text>
+    <rect x="490" y="260" width="200" height="120" fill="url(#cardGradient)" rx="8" stroke="#e9ecef"/>
+    <text x="510" y="285" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">Closed Tickets</text>
+    <text x="510" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#27ae60">1,158</text>
+    <rect x="710" y="260" width="200" height="120" fill="url(#cardGradient)" rx="8" stroke="#e9ecef"/>
+    <text x="730" y="285" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">Avg Resolution</text>
+    <text x="730" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2c3e50">4.2h</text>
+    <rect x="930" y="260" width="200" height="120" fill="url(#cardGradient)" rx="8" stroke="#3498db" stroke-width="2"/>
+    <text x="950" y="285" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">SLA Compliance</text>
+    <text x="950" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#3498db">94.2%</text>
+    <text x="950" y="330" font-family="Arial, sans-serif" font-size="10" fill="#3498db">👆 Click for details</text>
+    <rect x="50" y="400" width="540" height="300" fill="url(#cardGradient)" rx="8" stroke="#e9ecef"/>
+    <text x="70" y="430" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2c3e50">Monthly Created vs Resolved</text>
+    <polyline points="80,600 150,580 220,560 290,570 360,550 430,540 500,530" stroke="#3498db" stroke-width="3" fill="none"/>
+    <polyline points="80,620 150,610 220,590 290,600 360,580 430,570 500,560" stroke="#27ae60" stroke-width="3" fill="none"/>
+    <rect x="610" y="400" width="540" height="300" fill="url(#cardGradient)" rx="8" stroke="#e9ecef"/>
+    <text x="630" y="430" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2c3e50">Open Tickets by Type</text>
+    <circle cx="880" cy="550" r="80" fill="#3498db" opacity="0.7"/>
+    <circle cx="880" cy="550" r="60" fill="#e74c3c" opacity="0.7"/>
+    <circle cx="880" cy="550" r="40" fill="#f39c12" opacity="0.7"/>
+    <circle cx="880" cy="550" r="20" fill="#27ae60" opacity="0.7"/>
+    
+    <!-- Watermark -->
+    <text x="1000" y="780" font-family="Arial, sans-serif" font-size="12" fill="rgba(0,0,0,0.3)">[Sample Screenshot - Replace with Actual]</text>
+</svg>

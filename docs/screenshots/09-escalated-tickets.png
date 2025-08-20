@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:0.9" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="100%" height="100%" fill="url(#headerGradient)"/>
+    
+    <!-- Header -->
+    <rect x="0" y="0" width="100%" height="80" fill="rgba(44, 62, 80, 0.9)"/>
+    <text x="30" y="50" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Service Desk Analytics</text>
+    
+    <!-- Title -->
+    <text x="50" y="130" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#2c3e50">Escalated Tickets Section</text>
+    <text x="50" y="155" font-family="Arial, sans-serif" font-size="14" fill="#7f8c8d">Priority-coded escalated tickets with user impact information</text>
+    
+    <rect x="50" y="200" width="1100" height="350" fill="url(#cardGradient)" rx="10" stroke="#e9ecef" stroke-width="2"/>
+    <text x="70" y="235" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2c3e50">🔺 Escalated Tickets</text>
+    <rect x="950" y="210" width="120" height="25" fill="#e74c3c" rx="12"/>
+    <text x="980" y="227" font-family="Arial, sans-serif" font-size="12" fill="white">5 Escalated</text>
+    <rect x="70" y="260" width="1060" height="80" fill="#ffeaa7" rx="8" stroke="#fdcb6e" stroke-width="2"/>
+    <rect x="70" y="260" width="8" height="80" fill="#e17055" rx="4"/>
+    <circle cx="100" cy="290" r="8" fill="#e17055"/>
+    <text x="130" y="285" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2c3e50">Email server completely down</text>
+    <text x="130" y="305" font-family="Arial, sans-serif" font-size="12" fill="#636e72">TKT-001 • Global Corp • Created: 2 hours ago</text>
+    <rect x="900" y="275" width="60" height="20" fill="#e17055" rx="10"/>
+    <text x="915" y="289" font-family="Arial, sans-serif" font-size="10" fill="white">URGENT</text>
+    <text x="980" y="289" font-family="Arial, sans-serif" font-size="12" fill="#636e72">500+ users affected</text>
+    <rect x="70" y="350" width="1060" height="80" fill="#fab1a0" rx="8" stroke="#e17055" stroke-width="2"/>
+    <rect x="70" y="350" width="8" height="80" fill="#e17055" rx="4"/>
+    <circle cx="100" cy="380" r="8" fill="#e17055"/>
+    <text x="130" y="375" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2c3e50">Database performance critical</text>
+    <text x="130" y="395" font-family="Arial, sans-serif" font-size="12" fill="#636e72">TKT-002 • Tech Solutions • Created: 4 hours ago</text>
+    <rect x="900" y="365" width="50" height="20" fill="#fd79a8" rx="10"/>
+    <text x="915" y="379" font-family="Arial, sans-serif" font-size="10" fill="white">HIGH</text>
+    <text x="980" y="379" font-family="Arial, sans-serif" font-size="12" fill="#636e72">200+ users affected</text>
+    <rect x="70" y="440" width="1060" height="80" fill="#ffeaa7" rx="8" stroke="#fdcb6e" stroke-width="2"/>
+    <rect x="70" y="440" width="8" height="80" fill="#e17055" rx="4"/>
+    <circle cx="100" cy="470" r="8" fill="#e17055"/>
+    <text x="130" y="465" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2c3e50">Network connectivity issues</text>
+    <text x="130" y="485" font-family="Arial, sans-serif" font-size="12" fill="#636e72">TKT-003 • Manufacturing Inc • Created: 6 hours ago</text>
+    <rect x="900" y="455" width="60" height="20" fill="#e17055" rx="10"/>
+    <text x="915" y="469" font-family="Arial, sans-serif" font-size="10" fill="white">URGENT</text>
+    <text x="980" y="469" font-family="Arial, sans-serif" font-size="12" fill="#636e72">150+ users affected</text>
+    
+    <!-- Watermark -->
+    <text x="1000" y="780" font-family="Arial, sans-serif" font-size="12" fill="rgba(0,0,0,0.3)">[Sample Screenshot - Replace with Actual]</text>
+</svg>

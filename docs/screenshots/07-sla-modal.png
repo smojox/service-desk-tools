@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:0.9" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="100%" height="100%" fill="url(#headerGradient)"/>
+    
+    <!-- Header -->
+    <rect x="0" y="0" width="100%" height="80" fill="rgba(44, 62, 80, 0.9)"/>
+    <text x="30" y="50" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Service Desk Analytics</text>
+    
+    <!-- Title -->
+    <text x="50" y="130" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#2c3e50">SLA Compliance Management Modal</text>
+    <text x="50" y="155" font-family="Arial, sans-serif" font-size="14" fill="#7f8c8d">Modal window showing SLA breach details with toggle switches</text>
+    
+    <rect x="0" y="0" width="1200" height="800" fill="rgba(0,0,0,0.5)"/>
+    <rect x="200" y="150" width="800" height="500" fill="white" rx="10" stroke="#ddd" stroke-width="2"/>
+    <rect x="200" y="150" width="800" height="60" fill="#3498db" rx="10"/>
+    <rect x="200" y="190" width="800" height="20" fill="#3498db"/>
+    <text x="230" y="185" font-family="Arial, sans-serif" font-size="20" fill="white" font-weight="bold">SLA Compliance Details</text>
+    <text x="950" y="185" font-family="Arial, sans-serif" font-size="24" fill="white">✕</text>
+    <rect x="230" y="230" width="300" height="35" fill="#f8f9fa" rx="5" stroke="#ddd"/>
+    <text x="240" y="252" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">🔍 Search tickets...</text>
+    <rect x="800" y="230" width="120" height="35" fill="#27ae60" rx="5"/>
+    <text x="830" y="252" font-family="Arial, sans-serif" font-size="12" fill="white">Export to Excel</text>
+    <rect x="230" y="280" width="740" height="30" fill="#f8f9fa"/>
+    <text x="240" y="300" font-family="Arial, sans-serif" font-size="12" fill="#2c3e50" font-weight="bold">Ticket ID</text>
+    <text x="350" y="300" font-family="Arial, sans-serif" font-size="12" fill="#2c3e50" font-weight="bold">Subject</text>
+    <text x="600" y="300" font-family="Arial, sans-serif" font-size="12" fill="#2c3e50" font-weight="bold">Company</text>
+    <text x="800" y="300" font-family="Arial, sans-serif" font-size="12" fill="#2c3e50" font-weight="bold">SLA Status</text>
+    <text x="900" y="300" font-family="Arial, sans-serif" font-size="12" fill="#2c3e50" font-weight="bold">Override</text>
+    <rect x="230" y="310" width="740" height="40" fill="white" stroke="#eee"/>
+    <text x="240" y="335" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">TKT-001</text>
+    <text x="350" y="335" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">Email not working</text>
+    <text x="600" y="335" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">Acme Corp</text>
+    <rect x="800" y="320" width="60" height="20" fill="#e74c3c" rx="10"/>
+    <text x="815" y="334" font-family="Arial, sans-serif" font-size="10" fill="white">BREACH</text>
+    <rect x="910" y="322" width="30" height="16" fill="#e74c3c" rx="8"/>
+    <circle cx="932" cy="330" r="6" fill="white"/>
+    <rect x="230" y="350" width="740" height="40" fill="#f8f9fa" stroke="#eee"/>
+    <text x="240" y="375" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">TKT-002</text>
+    <text x="350" y="375" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">System slow performance</text>
+    <text x="600" y="375" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">Tech Inc</text>
+    <rect x="800" y="360" width="60" height="20" fill="#27ae60" rx="10"/>
+    <text x="815" y="374" font-family="Arial, sans-serif" font-size="10" fill="white">OK</text>
+    <rect x="910" y="362" width="30" height="16" fill="#27ae60" rx="8"/>
+    <circle cx="918" cy="370" r="6" fill="white"/>
+    <rect x="230" y="390" width="740" height="40" fill="white" stroke="#eee"/>
+    <text x="240" y="415" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">TKT-003</text>
+    <text x="350" y="415" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">Password reset needed</text>
+    <text x="600" y="415" font-family="Arial, sans-serif" font-size="11" fill="#2c3e50">Global Ltd</text>
+    <rect x="800" y="400" width="60" height="20" fill="#e74c3c" rx="10"/>
+    <text x="815" y="414" font-family="Arial, sans-serif" font-size="10" fill="white">BREACH</text>
+    <rect x="910" y="402" width="30" height="16" fill="#e74c3c" rx="8"/>
+    <circle cx="932" cy="410" r="6" fill="white"/>
+    <text x="230" y="470" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">• Green toggle = SLA compliant</text>
+    <text x="230" y="490" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">• Red toggle = SLA breach</text>
+    <text x="230" y="510" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d">• Click toggles to override system calculation</text>
+    <path d="M 880 350 L 900 350 L 890 340 M 900 350 L 890 360" stroke="#e74c3c" stroke-width="2" fill="none"/>
+    <text x="820" y="345" font-family="Arial, sans-serif" font-size="12" fill="#e74c3c" font-weight="bold">Click to toggle</text>
+    
+    <!-- Watermark -->
+    <text x="1000" y="780" font-family="Arial, sans-serif" font-size="12" fill="rgba(0,0,0,0.3)">[Sample Screenshot - Replace with Actual]</text>
+</svg>
