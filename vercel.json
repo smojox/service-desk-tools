@@ -1,11 +1,3 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "installCommand": "npm install --legacy-peer-deps",
-  "env": {
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXTAUTH_URL": "@nextauth_url",
-    "MONGODB_URI": "@mongodb_uri"
-  }
+  "installCommand": "npm install --legacy-peer-deps"
 }

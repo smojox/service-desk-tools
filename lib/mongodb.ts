@@ -1,10 +1,14 @@
 import { MongoClient, MongoClientOptions } from 'mongodb'
 
 if (!process.env.MONGODB_URI) {
-  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
+  }
+  // Use a placeholder for build time
+  console.warn('MONGODB_URI not set, using placeholder for build')
 }
 
-const uri = process.env.MONGODB_URI
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/placeholder'
 const options: MongoClientOptions = {
   maxPoolSize: 10,
   serverSelectionTimeoutMS: 5000,
