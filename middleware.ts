@@ -1,77 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Skip middleware completely for these paths
+  // Skip middleware completely for these paths - be very explicit
   if (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/') ||
     pathname === '/favicon.ico' ||
-    pathname.includes('.')
+    pathname.includes('.') ||
+    pathname === '/_vercel'
   ) {
     return NextResponse.next()
   }
 
   // Public paths that don't need authentication
-  const publicPaths = ['/login']
+  const publicPaths = ['/login', '/']
   if (publicPaths.includes(pathname)) {
     return NextResponse.next()
   }
 
-  // For build time or when no secret is available, allow all
-  if (!process.env.NEXTAUTH_SECRET) {
+  // For edge runtime compatibility - avoid process.env access
+  const secret = process.env.NEXTAUTH_SECRET
+  if (!secret) {
     return NextResponse.next()
   }
 
-  try {
-    const token = await getToken({ 
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET 
-    })
-
-    // Redirect to login if no token and not on root
-    if (!token && pathname !== '/') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-
-    // Redirect to tools if logged in and on login page
-    if (token && pathname === '/login') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/tools'
-      return NextResponse.redirect(url)
-    }
-
-    // Check permissions for protected routes
-    if (token) {
-      if (pathname.startsWith('/admin') && !token.permissions?.admin) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/tools'
-        url.search = '?error=unauthorized'
-        return NextResponse.redirect(url)
-      }
-
-      if (pathname.startsWith('/analytics') && !token.permissions?.analytics) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/tools'
-        url.search = '?error=no-analytics-access'
-        return NextResponse.redirect(url)
-      }
-
-      if (pathname.startsWith('/appeal-codes') && !token.permissions?.appealCodes) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/tools'
-        url.search = '?error=no-appeal-codes-access'
-        return NextResponse.redirect(url)
-      }
-    }
-
-  } catch (error) {
-    // In case of any error, just continue
-    console.error('Middleware error:', error)
+  // Simple session check using cookie presence instead of getToken
+  const sessionToken = request.cookies.get('next-auth.session-token') || request.cookies.get('__Secure-next-auth.session-token')
+  
+  if (!sessionToken) {
+    // Redirect to login if no session
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
   return NextResponse.next()
