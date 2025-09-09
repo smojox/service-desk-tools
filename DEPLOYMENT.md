@@ -5,7 +5,8 @@
 - ✅ **Test files removed**: Removed `resource-planner-test.tsx` and `resource-planner-simple.tsx`
 - ✅ **Console logs cleaned**: Removed debug console logs from production code
 - ✅ **Zone.Identifier files removed**: Cleaned up Windows metadata files
-- ✅ **Build successful**: `npm run build` completes without errors
+- ✅ **Middleware optimized**: Fixed edge runtime compatibility issues for Vercel
+- ✅ **Build successful**: `npm run build` completes without errors (middleware: 53.6 kB)
 - ✅ **Environment example provided**: `.env.example` created with all required variables
 - ✅ **Gitignore configured**: Proper `.gitignore` file in place
 - ✅ **Vercel config**: `vercel.json` configured with `--legacy-peer-deps`
@@ -107,6 +108,25 @@ Click "Deploy" - Vercel will automatically:
 - Set up email alerts for critical failures
 - Regular log review
 
+## Troubleshooting
+
+### Common Deployment Issues
+
+**MIDDLEWARE_INVOCATION_FAILED Error:**
+- Fixed in this version with optimized middleware
+- Middleware is now edge runtime compatible
+- Reduced middleware size to 53.6 kB
+
+**Build Failures:**
+- Use `npm install --legacy-peer-deps` (configured in vercel.json)
+- MongoDB connection errors during build are normal
+- Ensure all environment variables are set
+
+**Runtime Issues:**
+- Check Vercel function logs
+- Verify MongoDB Atlas whitelist includes Vercel IPs
+- Ensure NEXTAUTH_SECRET is set correctly
+
 ## Support
 
 For deployment issues:
@@ -114,6 +134,7 @@ For deployment issues:
 2. Verify environment variables are set correctly
 3. Ensure MongoDB connection string is valid
 4. Check API rate limits for external services
+5. If middleware issues persist, check edge runtime compatibility
 
 ## Security Considerations
 
