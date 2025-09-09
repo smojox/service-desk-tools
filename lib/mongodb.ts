@@ -48,4 +48,7 @@ export const COLLECTIONS = {
   USERS: 'users',
   PERMISSIONS: 'permissions',
   SESSIONS: 'sessions',
+  PRIORITY_TRACKER: 'priority_tracker',
+  CSI_TRACKER: 'csi_tracker',
+  RESOURCE_PLANNER: 'resource_planner',
 } as const

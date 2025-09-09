@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { FileText, BarChart3, Settings, Shield, LogOut, User, Loader2, AlertCircle } from "lucide-react"
+import { FileText, BarChart3, Settings, Shield, LogOut, User, Loader2, AlertCircle, Bug, AlertTriangle, TrendingUp, CalendarDays } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+import PriorityTrackerWidget from "@/components/priority-tracker-widget"
+import PersonalSummary from "@/components/personal-summary"
+import MyResourceCommitments from "@/components/my-resource-commitments"
 
 export default function ToolsPage() {
   const { data: session, status } = useSession()
@@ -111,7 +114,7 @@ export default function ToolsPage() {
 
       {/* Main Content */}
       <div className="p-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {error && (
             <Alert className="mb-6 bg-red-50 border-red-200">
               <AlertCircle className="h-4 w-4 text-red-600" />
@@ -120,13 +123,23 @@ export default function ToolsPage() {
               </AlertDescription>
             </Alert>
           )}
-          <Card className="border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-gray-900 text-3xl">Welcome, {session.user.name}!</CardTitle>
-              <p className="text-gray-600 text-lg">Your comprehensive toolkit for service desk management and analytics</p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Personal Summary - Left Column */}
+            <div className="lg:col-span-1 space-y-6">
+              <PersonalSummary />
+              <MyResourceCommitments />
+            </div>
+            
+            {/* Main Tools - Right Columns */}
+            <div className="lg:col-span-3">
+              <Card className="border-0 bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-gray-900 text-3xl">Welcome, {session.user.name}!</CardTitle>
+                  <p className="text-gray-600 text-lg">Your comprehensive toolkit for service desk management and analytics</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {/* Service Desk Analytics Widget */}
                 <Card className={`p-6 transition-shadow cursor-pointer border-2 ${
                   hasAnalyticsAccess 
@@ -205,6 +218,90 @@ export default function ToolsPage() {
                   </div>
                 </Card>
                 
+                {/* JIRA Support Assists Widget */}
+                <Card className="p-6 transition-shadow cursor-pointer border-2 hover:shadow-lg border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-3 rounded-full bg-purple-100">
+                        <Bug className="h-8 w-8 text-purple-600" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">JIRA Support Assists</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      View outstanding JIRA tickets for Support Assists project with assignee and status charts
+                    </p>
+                    <Button 
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={() => router.push('/jira')}
+                    >
+                      Open JIRA Dashboard
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* Priority Tracker Widget */}
+                <Card className="p-6 transition-shadow cursor-pointer border-2 hover:shadow-lg border-orange-200 bg-gradient-to-br from-orange-50 to-red-50">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-3 rounded-full bg-orange-100">
+                        <AlertTriangle className="h-8 w-8 text-orange-600" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Priority Tracker</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Track and manage high-priority issues across clients with integrated ticketing and comments
+                    </p>
+                    <Button 
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                      onClick={() => router.push('/priority-tracker')}
+                    >
+                      Open Priority Tracker
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* CSI Tracker Widget */}
+                <Card className="p-6 transition-shadow cursor-pointer border-2 hover:shadow-lg border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-3 rounded-full bg-blue-100">
+                        <TrendingUp className="h-8 w-8 text-blue-600" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">CSI Tracker</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Track continual service improvement initiatives with progress monitoring and categorization
+                    </p>
+                    <Button 
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={() => router.push('/csi-tracker')}
+                    >
+                      Open CSI Tracker
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* Resource Planner Widget */}
+                <Card className="p-6 transition-shadow cursor-pointer border-2 hover:shadow-lg border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-3 rounded-full bg-green-100">
+                        <CalendarDays className="h-8 w-8 text-green-600" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Resource Planner</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Schedule and assign tasks with calendar view, linking to Priority and CSI items
+                    </p>
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => router.push('/resource-planner')}
+                    >
+                      Open Resource Planner
+                    </Button>
+                  </div>
+                </Card>
+
                 {/* Placeholder for future tools */}
                 <Card className="p-6 text-center border-dashed border-2 border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100">
                   <div className="text-gray-500">
@@ -216,11 +313,12 @@ export default function ToolsPage() {
                     <h3 className="text-lg font-semibold mb-2">More Tools Coming Soon</h3>
                     <p className="text-sm">Additional service desk utilities and management tools will be available here</p>
                   </div>
-                </Card>
-              </div>
-
-            </CardContent>
-          </Card>
+                  </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
