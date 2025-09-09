@@ -3,9 +3,10 @@ import { createFreshdeskAPI } from '@/lib/freshdesk-api';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { noteBody } = await request.json();
     
     if (!noteBody) {
@@ -15,7 +16,7 @@ export async function POST(
       );
     }
 
-    console.log(`Creating private note for ticket ${params.id}:`, noteBody)
+    console.log(`Creating private note for ticket ${id}:`, noteBody)
 
     const domain = process.env.NEXT_PUBLIC_FRESHDESK_DOMAIN;
     const apiKey = process.env.FRESHDESK_API_KEY;
@@ -28,19 +29,19 @@ export async function POST(
     }
 
     const freshdeskAPI = createFreshdeskAPI(domain, apiKey);
-    const result = await freshdeskAPI.addPrivateNote(params.id, noteBody);
+    const result = await freshdeskAPI.addPrivateNote(id, noteBody);
 
     console.log(`Freshdesk API result for note creation:`, result)
 
     if (result.error) {
-      console.error(`Failed to create note for ticket ${params.id}:`, result.error)
+      console.error(`Failed to create note for ticket ${id}:`, result.error)
       return NextResponse.json(
         { error: result.error },
         { status: result.status || 500 }
       );
     }
 
-    console.log(`Successfully created private note for ticket ${params.id}`)
+    console.log(`Successfully created private note for ticket ${id}`)
     return NextResponse.json(result.data);
   } catch (error) {
     console.error('Error creating private note:', error);

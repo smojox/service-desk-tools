@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -15,11 +15,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
-    const item = await PriorityTrackerModel.getItemById(params.id)
+    const item = await PriorityTrackerModel.getItemById(id)
     
     if (!item) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 })
@@ -34,7 +35,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -43,14 +44,15 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
     const body = await request.json()
     const updateData: UpdatePriorityTrackerData = body
 
-    const item = await PriorityTrackerModel.updateItem(params.id, updateData)
+    const item = await PriorityTrackerModel.updateItem(id, updateData)
     
     if (!item) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 })
@@ -65,7 +67,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -74,11 +76,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
-    const success = await PriorityTrackerModel.deleteItem(params.id)
+    const success = await PriorityTrackerModel.deleteItem(id)
     
     if (!success) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 })

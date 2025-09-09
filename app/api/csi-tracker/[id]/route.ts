@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -15,11 +15,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
-    const item = await CSITrackerModel.getItemById(params.id)
+    const item = await CSITrackerModel.getItemById(id)
     
     if (!item) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 })
@@ -34,7 +35,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -43,7 +44,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
@@ -57,7 +59,7 @@ export async function PUT(
       }
     }
 
-    const item = await CSITrackerModel.updateItem(params.id, updateData)
+    const item = await CSITrackerModel.updateItem(id, updateData)
     
     if (!item) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 })
@@ -72,7 +74,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -81,11 +83,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
-    const success = await CSITrackerModel.deleteItem(params.id)
+    const success = await CSITrackerModel.deleteItem(id)
     
     if (!success) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 })

@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -15,7 +15,8 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
@@ -27,7 +28,7 @@ export async function POST(
     }
 
     const item = await PriorityTrackerModel.addComment(
-      params.id,
+      id,
       content.trim(),
       session.user.id,
       session.user.name

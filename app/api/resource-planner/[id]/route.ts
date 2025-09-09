@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -15,11 +15,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
-    const assignment = await ResourcePlannerModel.getAssignmentById(params.id)
+    const assignment = await ResourcePlannerModel.getAssignmentById(id)
     
     if (!assignment) {
       return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
@@ -34,7 +35,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -43,7 +44,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
@@ -58,7 +60,7 @@ export async function PUT(
       updateData.endDate = new Date(updateData.endDate)
     }
 
-    const assignment = await ResourcePlannerModel.updateAssignment(params.id, updateData)
+    const assignment = await ResourcePlannerModel.updateAssignment(id, updateData)
     
     if (!assignment) {
       return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
@@ -73,7 +75,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -82,11 +84,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ObjectId.isValid(params.id)) {
+    const { id } = await params
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
-    const success = await ResourcePlannerModel.deleteAssignment(params.id)
+    const success = await ResourcePlannerModel.deleteAssignment(id)
     
     if (!success) {
       return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })

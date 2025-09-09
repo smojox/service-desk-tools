@@ -3,9 +3,10 @@ import { createFreshdeskAPI } from '@/lib/freshdesk-api'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const domain = process.env.NEXT_PUBLIC_FRESHDESK_DOMAIN
     const apiKey = process.env.FRESHDESK_API_KEY
 
@@ -17,7 +18,7 @@ export async function GET(
     }
 
     const freshdeskAPI = createFreshdeskAPI(domain, apiKey)
-    const response = await freshdeskAPI.getTicket(params.id)
+    const response = await freshdeskAPI.getTicket(id)
 
     if (response.error) {
       return NextResponse.json(
@@ -38,9 +39,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const domain = process.env.NEXT_PUBLIC_FRESHDESK_DOMAIN
     const apiKey = process.env.FRESHDESK_API_KEY
 
@@ -62,7 +64,7 @@ export async function PUT(
     }
 
     const freshdeskAPI = createFreshdeskAPI(domain, apiKey)
-    const response = await freshdeskAPI.updateTicketCustomField(params.id, fieldName, fieldValue)
+    const response = await freshdeskAPI.updateTicketCustomField(id, fieldName, fieldValue)
 
     if (response.error) {
       return NextResponse.json(
