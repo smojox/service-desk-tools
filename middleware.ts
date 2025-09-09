@@ -1,82 +1,58 @@
-import { withAuth } from "next-auth/middleware"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
-export default withAuth(
-  function middleware(req) {
-    try {
-      const token = req.nextauth.token
-      const pathname = req.nextUrl.pathname
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-      // Allow access to login page
-      if (pathname === "/login") {
-        return NextResponse.next()
-      }
-
-      // Redirect to login if not authenticated
-      if (!token) {
-        return NextResponse.redirect(new URL("/login", req.url))
-      }
-
-      // Check admin access for admin routes
-      if (pathname.startsWith("/admin")) {
-        if (!token.permissions?.admin) {
-          return NextResponse.redirect(new URL("/tools?error=unauthorized", req.url))
-        }
-      }
-
-      // Check analytics access
-      if (pathname.startsWith("/analytics")) {
-        if (!token.permissions?.analytics) {
-          return NextResponse.redirect(new URL("/tools?error=no-analytics-access", req.url))
-        }
-      }
-
-      // Check appeal codes access
-      if (pathname.startsWith("/appeal-codes")) {
-        if (!token.permissions?.appealCodes) {
-          return NextResponse.redirect(new URL("/tools?error=no-appeal-codes-access", req.url))
-        }
-      }
-
-      return NextResponse.next()
-    } catch (error) {
-      console.error("Middleware error:", error)
-      // Allow the request to continue on error to prevent total failure
-      return NextResponse.next()
-    }
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        try {
-          const { pathname } = req.nextUrl
-
-          // Always allow access to login page
-          if (pathname === "/login") {
-            return true
-          }
-
-          // Require authentication for all other pages
-          return !!token
-        } catch (error) {
-          console.error("Auth callback error:", error)
-          return false
-        }
-      },
-    },
+  // Public routes that don't require authentication
+  const publicRoutes = ['/login', '/api/auth']
+  
+  // Check if the current path is public
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+  
+  // Get the JWT token to check authentication
+  const token = await getToken({ 
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET 
+  })
+  
+  // If user is not authenticated and trying to access protected route
+  if (!token && !isPublicRoute && pathname !== '/') {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
-)
+
+  // If user is authenticated and trying to access login page
+  if (token && pathname === '/login') {
+    return NextResponse.redirect(new URL('/tools', request.url))
+  }
+
+  // If authenticated, check permissions for protected routes
+  if (token) {
+    // Check admin access for admin routes
+    if (pathname.startsWith("/admin")) {
+      if (!token.permissions?.admin) {
+        return NextResponse.redirect(new URL("/tools?error=unauthorized", request.url))
+      }
+    }
+
+    // Check analytics access
+    if (pathname.startsWith("/analytics")) {
+      if (!token.permissions?.analytics) {
+        return NextResponse.redirect(new URL("/tools?error=no-analytics-access", request.url))
+      }
+    }
+
+    // Check appeal codes access
+    if (pathname.startsWith("/appeal-codes")) {
+      if (!token.permissions?.appealCodes) {
+        return NextResponse.redirect(new URL("/tools?error=no-appeal-codes-access", request.url))
+      }
+    }
+  }
+
+  return NextResponse.next()
+}
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public assets
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico|logo.png|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.svg$).*)",
-  ]
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|.*\\.gif|.*\\.webp).*)'],
 }
