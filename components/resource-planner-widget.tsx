@@ -79,18 +79,26 @@ function SelectableCalendarDay({
 }) {
   return (
     <div
-      className={`min-h-24 p-1 border border-gray-200 transition-colors cursor-pointer select-none ${
-        isCurrentMonth ? 'bg-white' : 'bg-gray-50'
-      } ${isToday(day) ? 'ring-2 ring-blue-500' : ''} ${
-        isSelected ? 'bg-blue-100 border-blue-400' : ''
-      } hover:bg-gray-100`}
+      className={`min-h-24 p-1 border-2 transition-all cursor-pointer select-none ${
+        isSelected 
+          ? 'bg-blue-200 border-blue-500 ring-2 ring-blue-300 shadow-md' 
+          : isCurrentMonth 
+            ? 'bg-white border-gray-200 hover:bg-gray-50' 
+            : 'bg-gray-50 border-gray-200'
+      } ${isToday(day) ? 'ring-2 ring-green-500' : ''}`}
       onClick={() => onDayClick(day)}
       onContextMenu={(e) => {
         e.preventDefault()
         onDayRightClick(day, e)
       }}
     >
-      <div className={`text-sm ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'} ${isToday(day) ? 'font-bold' : ''}`}>
+      <div className={`text-sm font-semibold ${
+        isSelected 
+          ? 'text-blue-900' 
+          : isCurrentMonth 
+            ? 'text-gray-900' 
+            : 'text-gray-400'
+      } ${isToday(day) ? 'font-bold' : ''}`}>
         {format(day, 'd')}
       </div>
       <div className="space-y-1 mt-1">
