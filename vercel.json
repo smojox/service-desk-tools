@@ -2,10 +2,5 @@
   "installCommand": "npm install --legacy-peer-deps",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "framework": "nextjs",
-  "functions": {
-    "app/**/*.{ts,tsx}": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "framework": "nextjs"
 }
