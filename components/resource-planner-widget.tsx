@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
-import { CalendarDays, Plus, Eye, Clock, User, Building, AlertCircle, CheckCircle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Users, GripVertical, AlertTriangle, TrendingUp } from "lucide-react"
+import { CalendarDays, Plus, Eye, Clock, User, Building, AlertCircle, CheckCircle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Users, GripVertical, AlertTriangle, TrendingUp, ExternalLink, Ticket } from "lucide-react"
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from "date-fns"
 import { ResourceAssignment } from "@/lib/models/ResourcePlanner"
 import { User as UserType } from "@/lib/models/User"
@@ -216,6 +216,10 @@ export default function ResourcePlannerWidget() {
   const [draggedItem, setDraggedItem] = useState<DragData | null>(null)
   const [dropDate, setDropDate] = useState<Date | null>(null)
   const [activeDragId, setActiveDragId] = useState<string | null>(null)
+  const [linkedTickets, setLinkedTickets] = useState<{
+    freshdeskTickets: string[]
+    jiraTickets: string[]
+  } | null>(null)
 
   const [assignmentForm, setAssignmentForm] = useState({
     assignedToId: "",
@@ -232,7 +236,11 @@ export default function ResourcePlannerWidget() {
   })
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor)
   )
 
@@ -295,6 +303,33 @@ export default function ResourcePlannerWidget() {
       }
     } catch (error) {
       console.error('Error fetching linked items:', error)
+    }
+  }
+
+  const fetchLinkedTickets = async (assignment: ResourceAssignment) => {
+    if (!assignment.linkedItemId || !assignment.linkedItemType) {
+      setLinkedTickets(null)
+      return
+    }
+
+    try {
+      const endpoint = assignment.linkedItemType === 'priority' 
+        ? `/api/priority-tracker/${assignment.linkedItemId.toString()}`
+        : `/api/csi-tracker/${assignment.linkedItemId.toString()}`
+      
+      const response = await fetch(endpoint)
+      if (response.ok) {
+        const data = await response.json()
+        setLinkedTickets({
+          freshdeskTickets: data.linkedFreshdeskTickets || [],
+          jiraTickets: data.linkedJiraTickets || []
+        })
+      } else {
+        setLinkedTickets(null)
+      }
+    } catch (error) {
+      console.error('Error fetching linked tickets:', error)
+      setLinkedTickets(null)
     }
   }
 
@@ -418,6 +453,14 @@ export default function ResourcePlannerWidget() {
     return format(new Date(date), 'MMM dd, yyyy')
   }
 
+  const getFreshdeskUrl = (ticketId: string) => {
+    return `https://support.tarantosystems.com/a/tickets/${ticketId}`
+  }
+
+  const getJiraUrl = (ticketId: string) => {
+    return `https://taranto.atlassian.net/browse/${ticketId}`
+  }
+
   const getAssignmentsForDate = (date: Date) => {
     return assignments.filter(assignment => {
       const startDate = new Date(assignment.startDate)
@@ -465,6 +508,7 @@ export default function ResourcePlannerWidget() {
               assignments={dayAssignments}
               onDayClick={(assignment) => {
                 setSelectedAssignment(assignment)
+                fetchLinkedTickets(assignment)
                 setIsDetailModalOpen(true)
               }}
               getPriorityColor={getPriorityColor}
@@ -496,6 +540,7 @@ export default function ResourcePlannerWidget() {
                 assignments={dayAssignments}
                 onDayClick={(assignment) => {
                   setSelectedAssignment(assignment)
+                  fetchLinkedTickets(assignment)
                   setIsDetailModalOpen(true)
                 }}
                 getPriorityColor={getPriorityColor}
@@ -704,6 +749,7 @@ export default function ResourcePlannerWidget() {
                                 size="sm"
                                 onClick={() => {
                                   setSelectedAssignment(assignment)
+                                  fetchLinkedTickets(assignment)
                                   setIsDetailModalOpen(true)
                                 }}
                               >
@@ -723,12 +769,16 @@ export default function ResourcePlannerWidget() {
       </div>
 
       {/* Drag overlay */}
-      <DragOverlay>
+      <DragOverlay dropAnimation={null}>
         {activeDragId && linkedItems && (() => {
           const [type, id] = activeDragId.split('-')
           const items = type === 'priority' ? linkedItems.priority : linkedItems.csi
           const item = items.find(item => item._id === id)
-          return item ? <DraggableItem item={item} type={type as 'priority' | 'csi'} /> : null
+          return item ? (
+            <div className="rotate-6 opacity-90 scale-105 shadow-xl">
+              <DraggableItem item={item} type={type as 'priority' | 'csi'} />
+            </div>
+          ) : null
         })()}
       </DragOverlay>
 
@@ -916,7 +966,12 @@ export default function ResourcePlannerWidget() {
       </Dialog>
 
       {/* Assignment Detail Modal */}
-      <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+      <Dialog open={isDetailModalOpen} onOpenChange={(open) => {
+        setIsDetailModalOpen(open)
+        if (!open) {
+          setLinkedTickets(null)
+        }
+      }}>
         <DialogContent className="max-w-2xl">
           {selectedAssignment && (
             <>
@@ -987,6 +1042,44 @@ export default function ResourcePlannerWidget() {
                       <Badge variant="outline">
                         {selectedAssignment.linkedItemType?.toUpperCase()}: {selectedAssignment.linkedItemRef}
                       </Badge>
+                    </div>
+                  </div>
+                )}
+
+                {linkedTickets && (linkedTickets.freshdeskTickets.length > 0 || linkedTickets.jiraTickets.length > 0) && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500 mb-2 block">Related Tickets</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {linkedTickets.freshdeskTickets.map((ticket) => (
+                        <a
+                          key={ticket}
+                          href={getFreshdeskUrl(ticket)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block"
+                        >
+                          <Badge variant="outline" className="flex items-center gap-1 hover:bg-blue-50 hover:border-blue-300 cursor-pointer transition-colors">
+                            <Ticket className="h-3 w-3" />
+                            FD: {ticket}
+                            <ExternalLink className="h-3 w-3" />
+                          </Badge>
+                        </a>
+                      ))}
+                      {linkedTickets.jiraTickets.map((ticket) => (
+                        <a
+                          key={ticket}
+                          href={getJiraUrl(ticket)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block"
+                        >
+                          <Badge variant="outline" className="flex items-center gap-1 hover:bg-blue-50 hover:border-blue-300 cursor-pointer transition-colors">
+                            <Ticket className="h-3 w-3" />
+                            JIRA: {ticket}
+                            <ExternalLink className="h-3 w-3" />
+                          </Badge>
+                        </a>
+                      ))}
                     </div>
                   </div>
                 )}
