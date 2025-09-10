@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,8 @@ export default function PriorityTrackerModal({ item, isOpen, onClose, onUpdate }
   const { data: session } = useSession()
   const [comment, setComment] = useState("")
   const [submittingComment, setSubmittingComment] = useState(false)
+  const [users, setUsers] = useState<{ id: string; name: string }[]>([])
+  const [reassigning, setReassigning] = useState(false)
 
   const handleStatusUpdate = async (itemId: string, newStatus: 'Open' | 'Closed' | 'On Hold') => {
     try {
@@ -39,6 +41,62 @@ export default function PriorityTrackerModal({ item, isOpen, onClose, onUpdate }
       }
     } catch (error) {
       console.error('Error updating status:', error)
+    }
+  }
+
+  // Load users for reassignment dropdown
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users')
+        if (response.ok) {
+          const data = await response.json()
+          setUsers(data.users || [])
+        }
+      } catch (error) {
+        console.error('Error loading users:', error)
+      }
+    }
+    
+    if (isOpen) {
+      fetchUsers()
+    }
+  }, [isOpen])
+
+  const handleReassign = async (newAssigneeId: string, newAssigneeName: string) => {
+    if (!item || newAssigneeId === item.assignedToId) return
+
+    setReassigning(true)
+    try {
+      // Update the assignee
+      const response = await fetch(`/api/priority-tracker/${item._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          assignedToId: newAssigneeId, 
+          assignedToName: newAssigneeName 
+        })
+      })
+
+      if (response.ok) {
+        // Add audit comment for reassignment
+        const auditResponse = await fetch(`/api/priority-tracker/${item._id}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            comment: `Ticket reassigned from ${item.assignedToName} to ${newAssigneeName}`,
+            commentType: 'system'
+          })
+        })
+
+        if (auditResponse.ok) {
+          onUpdate()
+        }
+      }
+    } catch (error) {
+      console.error('Error reassigning ticket:', error)
+    } finally {
+      setReassigning(false)
     }
   }
 
@@ -152,7 +210,36 @@ export default function PriorityTrackerModal({ item, isOpen, onClose, onUpdate }
                 <Label className="text-sm font-medium text-gray-500">Assigned To</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <User className="h-4 w-4" />
-                  {item.assignedToName}
+                  <Select
+                    value={item.assignedToId || ""}
+                    onValueChange={(newAssigneeId) => {
+                      const newAssignee = users.find(u => u.id === newAssigneeId)
+                      if (newAssignee) {
+                        handleReassign(newAssigneeId, newAssignee.name)
+                      }
+                    }}
+                    disabled={reassigning}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue>
+                        {reassigning ? (
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Reassigning...
+                          </div>
+                        ) : (
+                          item.assignedToName
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               
