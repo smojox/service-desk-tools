@@ -15,7 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
-import { CalendarDays, Plus, Eye, Clock, User, Building, AlertCircle, CheckCircle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Users, AlertTriangle, TrendingUp, ExternalLink, Ticket } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { CalendarDays, Plus, Eye, Clock, User, Building, AlertCircle, CheckCircle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Users, AlertTriangle, TrendingUp, ExternalLink, Ticket, Filter, X } from "lucide-react"
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from "date-fns"
 import { ResourceAssignment } from "@/lib/models/ResourcePlanner"
 import { User as UserType } from "@/lib/models/User"
@@ -67,7 +68,7 @@ function SelectableCalendarDay({
   isSelected,
   onDayClick,
   onDayRightClick,
-  getPriorityColor 
+  getAssigneeColor 
 }: { 
   day: Date
   isCurrentMonth: boolean
@@ -75,7 +76,7 @@ function SelectableCalendarDay({
   isSelected: boolean
   onDayClick: (day: Date) => void
   onDayRightClick: (day: Date, event: React.MouseEvent) => void
-  getPriorityColor: (priority: string) => string
+  getAssigneeColor: (assignee: string) => string
 }) {
   return (
     <div
@@ -105,7 +106,7 @@ function SelectableCalendarDay({
         {assignments.slice(0, 3).map(assignment => (
           <div
             key={assignment._id?.toString()}
-            className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 ${getPriorityColor(assignment.priority)}`}
+            className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 ${getAssigneeColor(assignment.assignedToName)}`}
             onClick={(e) => {
               e.stopPropagation()
               // Handle assignment click if needed
@@ -274,6 +275,8 @@ export default function ResourcePlannerWidget() {
     freshdeskTickets: string[]
     jiraTickets: string[]
   } | null>(null)
+  const [filteredAssignees, setFilteredAssignees] = useState<string[]>([])
+  const [assigneeColors, setAssigneeColors] = useState<Map<string, string>>(new Map())
 
   const [assignmentForm, setAssignmentForm] = useState({
     assignedToId: "",
@@ -293,6 +296,20 @@ export default function ResourcePlannerWidget() {
     fetchData()
     fetchLinkedItems()
   }, [selectedDate, calendarView])
+
+  // Generate colors for assignees when assignments change
+  useEffect(() => {
+    const assignees = Array.from(new Set(assignments.map(a => a.assignedToName)))
+    const newColors = new Map(assigneeColors)
+    
+    assignees.forEach((assignee, index) => {
+      if (!newColors.has(assignee)) {
+        newColors.set(assignee, generateAssigneeColor(index))
+      }
+    })
+    
+    setAssigneeColors(newColors)
+  }, [assignments])
 
   const fetchData = async () => {
     try {
@@ -493,6 +510,28 @@ export default function ResourcePlannerWidget() {
     setSelectedItem(null)
   }
 
+  const generateAssigneeColor = (index: number) => {
+    const colors = [
+      'bg-red-100 text-red-800 border-red-200',
+      'bg-blue-100 text-blue-800 border-blue-200', 
+      'bg-green-100 text-green-800 border-green-200',
+      'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'bg-purple-100 text-purple-800 border-purple-200',
+      'bg-pink-100 text-pink-800 border-pink-200',
+      'bg-indigo-100 text-indigo-800 border-indigo-200',
+      'bg-teal-100 text-teal-800 border-teal-200',
+      'bg-orange-100 text-orange-800 border-orange-200',
+      'bg-cyan-100 text-cyan-800 border-cyan-200',
+      'bg-rose-100 text-rose-800 border-rose-200',
+      'bg-emerald-100 text-emerald-800 border-emerald-200'
+    ]
+    return colors[index % colors.length]
+  }
+
+  const getAssigneeColor = (assigneeName: string) => {
+    return assigneeColors.get(assigneeName) || 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'Critical': return 'bg-red-100 text-red-800 border-red-200'
@@ -531,11 +570,24 @@ export default function ResourcePlannerWidget() {
   }
 
   const getAssignmentsForDate = (date: Date) => {
-    return assignments.filter(assignment => {
+    let filteredAssignments = assignments.filter(assignment => {
       const startDate = new Date(assignment.startDate)
       const endDate = new Date(assignment.endDate)
       return date >= startDate && date <= endDate
     })
+
+    // Apply assignee filter if any are selected
+    if (filteredAssignees.length > 0) {
+      filteredAssignments = filteredAssignments.filter(assignment => 
+        filteredAssignees.includes(assignment.assignedToName)
+      )
+    }
+
+    return filteredAssignments
+  }
+
+  const getAllAssignees = () => {
+    return Array.from(new Set(assignments.map(a => a.assignedToName))).sort()
   }
 
   const navigateCalendar = (direction: 'prev' | 'next') => {
@@ -579,7 +631,7 @@ export default function ResourcePlannerWidget() {
               isSelected={isSelected}
               onDayClick={handleDayClick}
               onDayRightClick={handleDayRightClick}
-              getPriorityColor={getPriorityColor}
+              getAssigneeColor={getAssigneeColor}
             />
           )
         })}
@@ -610,7 +662,7 @@ export default function ResourcePlannerWidget() {
                 isSelected={isSelected}
                 onDayClick={handleDayClick}
                 onDayRightClick={handleDayRightClick}
-                getPriorityColor={getPriorityColor}
+                getAssigneeColor={getAssigneeColor}
               />
             </div>
           )
@@ -692,6 +744,70 @@ export default function ResourcePlannerWidget() {
                       <SelectItem value="week">Week</SelectItem>
                     </SelectContent>
                   </Select>
+                  
+                  {/* Assignee Filter */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-48 justify-start">
+                        <Filter className="mr-2 h-4 w-4" />
+                        {filteredAssignees.length === 0 
+                          ? "All Assignees" 
+                          : filteredAssignees.length === 1 
+                            ? filteredAssignees[0]
+                            : `${filteredAssignees.length} selected`}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-0">
+                      <div className="p-3 border-b">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold">Filter by Assignee</h4>
+                          {filteredAssignees.length > 0 && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setFilteredAssignees([])}
+                              className="h-auto p-0 text-sm text-muted-foreground hover:text-foreground"
+                            >
+                              Clear all
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <ScrollArea className="max-h-64 p-3">
+                        <div className="space-y-2">
+                          {getAllAssignees().map((assignee) => (
+                            <div key={assignee} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`assignee-${assignee}`}
+                                checked={filteredAssignees.includes(assignee)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setFilteredAssignees(prev => [...prev, assignee])
+                                  } else {
+                                    setFilteredAssignees(prev => prev.filter(a => a !== assignee))
+                                  }
+                                }}
+                              />
+                              <label 
+                                htmlFor={`assignee-${assignee}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-3 h-3 rounded border ${getAssigneeColor(assignee)}`}></div>
+                                  {assignee}
+                                </div>
+                              </label>
+                            </div>
+                          ))}
+                          {getAllAssignees().length === 0 && (
+                            <div className="text-sm text-muted-foreground text-center py-2">
+                              No assignees found
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
