@@ -301,19 +301,6 @@ export default function ToolsPage() {
                     </Button>
                   </div>
                 </Card>
-
-                {/* Placeholder for future tools */}
-                <Card className="p-6 text-center border-dashed border-2 border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100">
-                  <div className="text-gray-500">
-                    <div className="flex justify-center mb-4">
-                      <div className="p-3 bg-gray-200 rounded-full">
-                        <Settings className="h-8 w-8 text-gray-400" />
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">More Tools Coming Soon</h3>
-                    <p className="text-sm">Additional service desk utilities and management tools will be available here</p>
-                  </div>
-                  </Card>
                   </div>
                 </CardContent>
               </Card>

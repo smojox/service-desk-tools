@@ -56,6 +56,7 @@ import { ExecutiveSummaryModal, PageSelectionOptions } from "@/components/modals
 import { usePDFExport } from "@/components/pdf-export"
 import { freshdeskClient } from "@/lib/freshdesk-client"
 import { toast } from "sonner"
+import { AuthWrapper } from "@/components/auth-wrapper"
 
 
 const statusColors = {
@@ -645,7 +646,8 @@ export default function AnalyticsDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-400 via-cyan-500 to-green-400">
+    <AuthWrapper requiredPermissions={{ analytics: true }}>
+      <div className="min-h-screen bg-gradient-to-br from-teal-400 via-cyan-500 to-green-400">
       {/* Header */}
       <header className="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700">
         <div className="px-6 py-4">
@@ -655,7 +657,7 @@ export default function AnalyticsDashboard() {
                 variant="ghost"
                 size="sm"
                 className="text-gray-300 hover:text-white hover:bg-white/20"
-                onClick={() => router.push('/')}
+                onClick={() => router.push('/tools')}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Tools
@@ -1348,6 +1350,7 @@ export default function AnalyticsDashboard() {
       )}
 
       
-    </div>
+      </div>
+    </AuthWrapper>
   )
 }
