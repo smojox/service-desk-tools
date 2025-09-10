@@ -9,16 +9,33 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
-import { CalendarDays, Plus, Eye, Clock, User, Building, AlertCircle, CheckCircle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Users } from "lucide-react"
+import { CalendarDays, Plus, Eye, Clock, User, Building, AlertCircle, CheckCircle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Users, GripVertical, AlertTriangle, TrendingUp } from "lucide-react"
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from "date-fns"
 import { ResourceAssignment } from "@/lib/models/ResourcePlanner"
 import { User as UserType } from "@/lib/models/User"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  Active,
+  Over,
+} from "@dnd-kit/core"
+import {
+  useDraggable,
+  useDroppable,
+} from "@dnd-kit/core"
 
 interface ResourcePlannerStats {
   totalAssignments: number
@@ -51,7 +68,138 @@ interface LinkedItems {
   }>
 }
 
+interface DragData {
+  item: LinkedItems['priority'][0] | LinkedItems['csi'][0]
+  type: 'priority' | 'csi'
+}
+
 type CalendarView = 'month' | 'week' | 'day'
+
+// Draggable item component
+function DraggableItem({ item, type }: { item: LinkedItems['priority'][0] | LinkedItems['csi'][0], type: 'priority' | 'csi' }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: `${type}-${item._id}`,
+    data: {
+      item,
+      type,
+    } as DragData
+  })
+
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+  } : undefined
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={`p-3 rounded-lg border cursor-grab active:cursor-grabbing transition-all ${
+        isDragging ? 'opacity-50' : ''
+      } ${
+        type === 'priority' 
+          ? 'bg-orange-50 border-orange-200 hover:bg-orange-100' 
+          : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
+      }`}
+    >
+      <div className="flex items-start gap-2">
+        <GripVertical className="h-4 w-4 text-gray-400 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            {type === 'priority' ? (
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+            ) : (
+              <TrendingUp className="h-4 w-4 text-blue-600" />
+            )}
+            <Badge variant="outline" className="text-xs">
+              {item.ref}
+            </Badge>
+          </div>
+          <p className="font-medium text-sm truncate">{item.summary}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <User className="h-3 w-3 text-gray-400" />
+            <span className="text-xs text-gray-600">{item.assignedToName}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Building className="h-3 w-3 text-gray-400" />
+            <span className="text-xs text-gray-600">{item.companyName}</span>
+          </div>
+          {'percentComplete' in item && (
+            <div className="mt-1">
+              <Badge className="bg-blue-100 text-blue-800 text-xs">
+                {item.percentComplete}% Complete
+              </Badge>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Droppable calendar day component
+function DroppableCalendarDay({ 
+  day, 
+  isCurrentMonth, 
+  assignments, 
+  onDayClick,
+  getPriorityColor 
+}: { 
+  day: Date
+  isCurrentMonth: boolean
+  assignments: ResourceAssignment[]
+  onDayClick: (assignment: ResourceAssignment) => void
+  getPriorityColor: (priority: string) => string
+}) {
+  const {
+    isOver,
+    setNodeRef
+  } = useDroppable({
+    id: day.toISOString(),
+    data: {
+      date: day,
+    }
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`min-h-24 p-1 border border-gray-200 transition-colors ${
+        isCurrentMonth ? 'bg-white' : 'bg-gray-50'
+      } ${isToday(day) ? 'ring-2 ring-blue-500' : ''} ${
+        isOver ? 'bg-green-50 border-green-300' : ''
+      }`}
+    >
+      <div className={`text-sm ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'} ${isToday(day) ? 'font-bold' : ''}`}>
+        {format(day, 'd')}
+      </div>
+      <div className="space-y-1 mt-1">
+        {assignments.slice(0, 3).map(assignment => (
+          <div
+            key={assignment._id?.toString()}
+            className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 ${getPriorityColor(assignment.priority)}`}
+            onClick={() => onDayClick(assignment)}
+          >
+            <div className="font-medium truncate">{assignment.title}</div>
+            <div className="text-xs opacity-75">{assignment.assignedToName}</div>
+          </div>
+        ))}
+        {assignments.length > 3 && (
+          <div className="text-xs text-gray-500 text-center">
+            +{assignments.length - 3} more
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function ResourcePlannerWidget() {
   const { data: session } = useSession()
@@ -63,12 +211,13 @@ export default function ResourcePlannerWidget() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [calendarView, setCalendarView] = useState<CalendarView>('month')
   const [selectedAssignment, setSelectedAssignment] = useState<ResourceAssignment | null>(null)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [isDragAssignmentModalOpen, setIsDragAssignmentModalOpen] = useState(false)
+  const [draggedItem, setDraggedItem] = useState<DragData | null>(null)
+  const [dropDate, setDropDate] = useState<Date | null>(null)
+  const [activeDragId, setActiveDragId] = useState<string | null>(null)
 
-  const [createForm, setCreateForm] = useState({
-    title: "",
-    description: "",
+  const [assignmentForm, setAssignmentForm] = useState({
     assignedToId: "",
     assignedToName: "",
     startDate: new Date(),
@@ -77,12 +226,15 @@ export default function ResourcePlannerWidget() {
     endTime: "",
     isAllDay: false,
     priority: "Medium" as "Low" | "Medium" | "High" | "Critical",
-    linkedItemId: "",
-    linkedItemType: "" as "" | "priority" | "csi",
     location: "",
     estimatedHours: "",
     notes: ""
   })
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor)
+  )
 
   useEffect(() => {
     fetchData()
@@ -93,7 +245,6 @@ export default function ResourcePlannerWidget() {
     try {
       setLoading(true)
       
-      // Calculate date range based on calendar view
       let startDate: Date
       let endDate: Date
       
@@ -147,39 +298,60 @@ export default function ResourcePlannerWidget() {
     }
   }
 
-  const handleCreateAssignment = async (e: React.FormEvent) => {
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(String(event.active.id))
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveDragId(null)
+
+    if (!over || !active.data.current) return
+
+    const dragData = active.data.current as DragData
+    const dropDateData = new Date(over.id as string)
+
+    setDraggedItem(dragData)
+    setDropDate(dropDateData)
+    
+    // Pre-fill form with dragged item data
+    setAssignmentForm(prev => ({
+      ...prev,
+      startDate: dropDateData,
+      endDate: dropDateData,
+      assignedToId: "",
+      assignedToName: dragData.item.assignedToName,
+      isAllDay: true
+    }))
+    
+    setIsDragAssignmentModalOpen(true)
+  }
+
+  const handleCreateDragAssignment = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    const selectedUser = users.find(u => u._id?.toString() === createForm.assignedToId)
+    if (!draggedItem || !dropDate) return
+
+    const selectedUser = users.find(u => u._id?.toString() === assignmentForm.assignedToId)
     if (!selectedUser) return
 
-    // Get linked item details if selected
-    let linkedItemRef = ""
-    if (createForm.linkedItemId && createForm.linkedItemType && linkedItems) {
-      const items = createForm.linkedItemType === 'priority' ? linkedItems.priority : linkedItems.csi
-      const linkedItem = items.find(item => item._id === createForm.linkedItemId)
-      if (linkedItem) {
-        linkedItemRef = linkedItem.ref
-      }
-    }
-
     const payload = {
-      title: createForm.title,
-      description: createForm.description,
-      assignedToId: createForm.assignedToId,
+      title: draggedItem.item.summary,
+      description: `Assignment for ${draggedItem.type.toUpperCase()} item: ${draggedItem.item.ref}`,
+      assignedToId: assignmentForm.assignedToId,
       assignedToName: selectedUser.name,
-      startDate: createForm.startDate.toISOString(),
-      endDate: createForm.endDate.toISOString(),
-      startTime: createForm.startTime || undefined,
-      endTime: createForm.endTime || undefined,
-      isAllDay: createForm.isAllDay,
-      priority: createForm.priority,
-      linkedItemId: createForm.linkedItemId || undefined,
-      linkedItemType: createForm.linkedItemType || undefined,
-      linkedItemRef: linkedItemRef || undefined,
-      location: createForm.location || undefined,
-      estimatedHours: createForm.estimatedHours ? parseFloat(createForm.estimatedHours) : undefined,
-      notes: createForm.notes || undefined
+      startDate: assignmentForm.startDate.toISOString(),
+      endDate: assignmentForm.endDate.toISOString(),
+      startTime: assignmentForm.startTime || undefined,
+      endTime: assignmentForm.endTime || undefined,
+      isAllDay: assignmentForm.isAllDay,
+      priority: assignmentForm.priority,
+      linkedItemId: draggedItem.item._id,
+      linkedItemType: draggedItem.type,
+      linkedItemRef: draggedItem.item.ref,
+      location: assignmentForm.location || undefined,
+      estimatedHours: assignmentForm.estimatedHours ? parseFloat(assignmentForm.estimatedHours) : undefined,
+      notes: assignmentForm.notes || undefined
     }
 
     try {
@@ -190,8 +362,8 @@ export default function ResourcePlannerWidget() {
       })
 
       if (response.ok) {
-        setIsCreateModalOpen(false)
-        resetCreateForm()
+        setIsDragAssignmentModalOpen(false)
+        resetAssignmentForm()
         fetchData()
       }
     } catch (error) {
@@ -199,10 +371,8 @@ export default function ResourcePlannerWidget() {
     }
   }
 
-  const resetCreateForm = () => {
-    setCreateForm({
-      title: "",
-      description: "",
+  const resetAssignmentForm = () => {
+    setAssignmentForm({
       assignedToId: "",
       assignedToName: "",
       startDate: new Date(),
@@ -211,12 +381,12 @@ export default function ResourcePlannerWidget() {
       endTime: "",
       isAllDay: false,
       priority: "Medium",
-      linkedItemId: "",
-      linkedItemType: "",
       location: "",
       estimatedHours: "",
       notes: ""
     })
+    setDraggedItem(null)
+    setDropDate(null)
   }
 
   const getPriorityColor = (priority: string) => {
@@ -288,36 +458,17 @@ export default function ResourcePlannerWidget() {
           const isCurrentMonth = day >= monthStart && day <= monthEnd
           
           return (
-            <div
+            <DroppableCalendarDay
               key={day.toISOString()}
-              className={`min-h-24 p-1 border border-gray-200 ${
-                isCurrentMonth ? 'bg-white' : 'bg-gray-50'
-              } ${isToday(day) ? 'ring-2 ring-blue-500' : ''}`}
-            >
-              <div className={`text-sm ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'} ${isToday(day) ? 'font-bold' : ''}`}>
-                {format(day, 'd')}
-              </div>
-              <div className="space-y-1 mt-1">
-                {dayAssignments.slice(0, 3).map(assignment => (
-                  <div
-                    key={assignment._id?.toString()}
-                    className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 ${getPriorityColor(assignment.priority)}`}
-                    onClick={() => {
-                      setSelectedAssignment(assignment)
-                      setIsDetailModalOpen(true)
-                    }}
-                  >
-                    <div className="font-medium truncate">{assignment.title}</div>
-                    <div className="text-xs opacity-75">{assignment.assignedToName}</div>
-                  </div>
-                ))}
-                {dayAssignments.length > 3 && (
-                  <div className="text-xs text-gray-500 text-center">
-                    +{dayAssignments.length - 3} more
-                  </div>
-                )}
-              </div>
-            </div>
+              day={day}
+              isCurrentMonth={isCurrentMonth}
+              assignments={dayAssignments}
+              onDayClick={(assignment) => {
+                setSelectedAssignment(assignment)
+                setIsDetailModalOpen(true)
+              }}
+              getPriorityColor={getPriorityColor}
+            />
           )
         })}
       </div>
@@ -339,24 +490,16 @@ export default function ResourcePlannerWidget() {
                 <div className="text-sm text-gray-500">{format(day, 'EEE')}</div>
                 <div className="text-lg">{format(day, 'd')}</div>
               </div>
-              <div className="space-y-2">
-                {dayAssignments.map(assignment => (
-                  <div
-                    key={assignment._id?.toString()}
-                    className={`p-2 rounded cursor-pointer hover:opacity-80 ${getPriorityColor(assignment.priority)}`}
-                    onClick={() => {
-                      setSelectedAssignment(assignment)
-                      setIsDetailModalOpen(true)
-                    }}
-                  >
-                    <div className="font-medium text-sm">{assignment.title}</div>
-                    <div className="text-xs opacity-75">{assignment.assignedToName}</div>
-                    {!assignment.isAllDay && assignment.startTime && (
-                      <div className="text-xs opacity-75">{formatTime(assignment.startTime)}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <DroppableCalendarDay
+                day={day}
+                isCurrentMonth={true}
+                assignments={dayAssignments}
+                onDayClick={(assignment) => {
+                  setSelectedAssignment(assignment)
+                  setIsDetailModalOpen(true)
+                }}
+                getPriorityColor={getPriorityColor}
+              />
             </div>
           )
         })}
@@ -375,507 +518,515 @@ export default function ResourcePlannerWidget() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-green-600" />
-              Resource Planner
-            </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Schedule and manage resource assignments with calendar view
-            </p>
-          </div>
-          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Assignment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create New Resource Assignment</DialogTitle>
-                <DialogDescription>
-                  Schedule a new task or assignment for team members
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateAssignment}>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="title">Title *</Label>
-                    <Input
-                      id="title"
-                      value={createForm.title}
-                      onChange={(e) => setCreateForm(prev => ({ ...prev, title: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={createForm.description}
-                      onChange={(e) => setCreateForm(prev => ({ ...prev, description: e.target.value }))}
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="assignee">Assigned To *</Label>
-                      <Select 
-                        value={createForm.assignedToId} 
-                        onValueChange={(value) => setCreateForm(prev => ({ ...prev, assignedToId: value }))}
-                        required
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select assignee" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {users.filter(user => user._id).map((user) => (
-                            <SelectItem key={user._id!.toString()} value={user._id!.toString()}>
-                              {user.name} ({user.email})
-                            </SelectItem>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar with draggable items */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <GripVertical className="h-5 w-5" />
+                Drag & Drop Items
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Drag Priority or CSI items onto calendar dates to schedule assignments
+              </p>
+            </CardHeader>
+            <CardContent>
+              {linkedItems && (
+                <div className="space-y-4">
+                  {linkedItems.priority.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2 flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-orange-600" />
+                        Priority Items ({linkedItems.priority.length})
+                      </h4>
+                      <ScrollArea className="h-64">
+                        <div className="space-y-2">
+                          {linkedItems.priority.map((item) => (
+                            <DraggableItem key={`priority-${item._id}`} item={item} type="priority" />
                           ))}
-                        </SelectContent>
-                      </Select>
+                        </div>
+                      </ScrollArea>
                     </div>
+                  )}
+                  
+                  {linkedItems.csi.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2 flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-blue-600" />
+                        CSI Items ({linkedItems.csi.length})
+                      </h4>
+                      <ScrollArea className="h-64">
+                        <div className="space-y-2">
+                          {linkedItems.csi.map((item) => (
+                            <DraggableItem key={`csi-${item._id}`} item={item} type="csi" />
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  )}
+                  
+                  {linkedItems.priority.length === 0 && linkedItems.csi.length === 0 && (
+                    <p className="text-sm text-gray-500 italic text-center py-8">
+                      No Priority or CSI items available for assignment
+                    </p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="priority">Priority *</Label>
-                      <Select 
-                        value={createForm.priority} 
-                        onValueChange={(value) => setCreateForm(prev => ({ ...prev, priority: value as "Low" | "Medium" | "High" | "Critical" }))}
-                        required
-                      >
-                        <SelectTrigger>
+        {/* Main calendar area */}
+        <div className="lg:col-span-3">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-green-600" />
+                Resource Planner Calendar
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Drop items from the sidebar onto dates to create assignments
+              </p>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="calendar" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="calendar" className="space-y-4">
+                  {/* Calendar Controls */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => navigateCalendar('prev')}>
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
+                        Today
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => navigateCalendar('next')}>
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <h3 className="text-lg font-semibold ml-4">
+                        {calendarView === 'month' && format(selectedDate, 'MMMM yyyy')}
+                        {calendarView === 'week' && `Week of ${format(startOfWeek(selectedDate, { weekStartsOn: 1 }), 'MMM dd, yyyy')}`}
+                        {calendarView === 'day' && format(selectedDate, 'EEEE, MMM dd, yyyy')}
+                      </h3>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Select value={calendarView} onValueChange={(value: CalendarView) => setCalendarView(value)}>
+                        <SelectTrigger className="w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Low">Low</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="High">High</SelectItem>
-                          <SelectItem value="Critical">Critical</SelectItem>
+                          <SelectItem value="month">Month</SelectItem>
+                          <SelectItem value="week">Week</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
-                  <div className="grid gap-2">
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="allDay"
-                        checked={createForm.isAllDay}
-                        onCheckedChange={(checked) => setCreateForm(prev => ({ ...prev, isAllDay: checked }))}
-                      />
-                      <Label htmlFor="allDay">All Day</Label>
-                    </div>
+                  {/* Calendar Display */}
+                  <div className="border rounded-lg p-4 bg-white">
+                    {calendarView === 'month' && renderMonthView()}
+                    {calendarView === 'week' && renderWeekView()}
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label>Start Date *</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="justify-start text-left font-normal">
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {format(createForm.startDate, "PPP")}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={createForm.startDate}
-                            onSelect={(date) => date && setCreateForm(prev => ({ ...prev, startDate: date }))}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>End Date *</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="justify-start text-left font-normal">
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {format(createForm.endDate, "PPP")}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={createForm.endDate}
-                            onSelect={(date) => date && setCreateForm(prev => ({ ...prev, endDate: date }))}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </div>
-
-                  {!createForm.isAllDay && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="startTime">Start Time</Label>
-                        <Input
-                          id="startTime"
-                          type="time"
-                          value={createForm.startTime}
-                          onChange={(e) => setCreateForm(prev => ({ ...prev, startTime: e.target.value }))}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="endTime">End Time</Label>
-                        <Input
-                          id="endTime"
-                          type="time"
-                          value={createForm.endTime}
-                          onChange={(e) => setCreateForm(prev => ({ ...prev, endTime: e.target.value }))}
-                        />
-                      </div>
+                </TabsContent>
+                
+                <TabsContent value="overview" className="space-y-4">
+                  {stats && (
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold">{stats.totalAssignments}</div>
+                          <p className="text-sm text-muted-foreground">Total</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold text-blue-600">{stats.scheduled}</div>
+                          <p className="text-sm text-muted-foreground">Scheduled</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
+                          <p className="text-sm text-muted-foreground">In Progress</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+                          <p className="text-sm text-muted-foreground">Completed</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <div className="text-2xl font-bold text-red-600">{stats.cancelled}</div>
+                          <p className="text-sm text-muted-foreground">Cancelled</p>
+                        </CardContent>
+                      </Card>
                     </div>
                   )}
 
-                  {linkedItems && (
-                    <div className="grid gap-2">
-                      <Label htmlFor="linkedItem">Link to Priority/CSI Item (optional)</Label>
-                      <Select
-                        value={createForm.linkedItemId}
-                        onValueChange={(value) => {
-                          if (value && value !== "none") {
-                            const allItems = [...linkedItems.priority, ...linkedItems.csi]
-                            const selectedItem = allItems.find(item => item._id === value)
-                            if (selectedItem) {
-                              setCreateForm(prev => ({
-                                ...prev,
-                                linkedItemId: value,
-                                linkedItemType: selectedItem.type,
-                                title: prev.title || selectedItem.summary,
-                                assignedToId: prev.assignedToId || "",
-                                assignedToName: prev.assignedToName || selectedItem.assignedToName
-                              }))
-                            }
-                          } else {
-                            setCreateForm(prev => ({ ...prev, linkedItemId: "", linkedItemType: "" }))
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select item to link" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">None</SelectItem>
-                          {linkedItems.priority.length > 0 && (
-                            <>
-                              <SelectItem value="priority-header" disabled>
-                                — Priority Items —
-                              </SelectItem>
-                              {linkedItems.priority.map((item) => (
-                                <SelectItem key={`priority-${item._id}`} value={item._id}>
-                                  {item.ref}: {item.summary}
-                                </SelectItem>
-                              ))}
-                            </>
-                          )}
-                          {linkedItems.csi.length > 0 && (
-                            <>
-                              <SelectItem value="csi-header" disabled>
-                                — CSI Items —
-                              </SelectItem>
-                              {linkedItems.csi.map((item) => (
-                                <SelectItem key={`csi-${item._id}`} value={item._id}>
-                                  {item.ref}: {item.summary} ({item.percentComplete}%)
-                                </SelectItem>
-                              ))}
-                            </>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  {stats?.upcomingDeadlines && stats.upcomingDeadlines.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Upcoming Deadlines</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {stats.upcomingDeadlines.map((assignment) => (
+                            <div key={assignment._id?.toString()} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                              <div className="flex-1">
+                                <h4 className="font-medium">{assignment.title}</h4>
+                                <p className="text-sm text-gray-600">{assignment.description}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge className={getStatusColor(assignment.status)}>
+                                    {assignment.status}
+                                  </Badge>
+                                  <span className="text-xs text-gray-500">
+                                    Due: {formatDate(assignment.endDate)}
+                                  </span>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedAssignment(assignment)
+                                  setIsDetailModalOpen(true)
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        value={createForm.location}
-                        onChange={(e) => setCreateForm(prev => ({ ...prev, location: e.target.value }))}
-                        placeholder="Office, Remote, Client site..."
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="estimatedHours">Estimated Hours</Label>
-                      <Input
-                        id="estimatedHours"
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        value={createForm.estimatedHours}
-                        onChange={(e) => setCreateForm(prev => ({ ...prev, estimatedHours: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="notes">Notes</Label>
-                    <Textarea
-                      id="notes"
-                      value={createForm.notes}
-                      onChange={(e) => setCreateForm(prev => ({ ...prev, notes: e.target.value }))}
-                      rows={3}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Create Assignment</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
         </div>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="calendar" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="calendar" className="space-y-4">
-            {/* Calendar Controls */}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigateCalendar('prev')}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
-                  Today
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigateCalendar('next')}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <h3 className="text-lg font-semibold ml-4">
-                  {calendarView === 'month' && format(selectedDate, 'MMMM yyyy')}
-                  {calendarView === 'week' && `Week of ${format(startOfWeek(selectedDate, { weekStartsOn: 1 }), 'MMM dd, yyyy')}`}
-                  {calendarView === 'day' && format(selectedDate, 'EEEE, MMM dd, yyyy')}
-                </h3>
+      </div>
+
+      {/* Drag overlay */}
+      <DragOverlay>
+        {activeDragId && linkedItems && (() => {
+          const [type, id] = activeDragId.split('-')
+          const items = type === 'priority' ? linkedItems.priority : linkedItems.csi
+          const item = items.find(item => item._id === id)
+          return item ? <DraggableItem item={item} type={type as 'priority' | 'csi'} /> : null
+        })()}
+      </DragOverlay>
+
+      {/* Drag Assignment Modal */}
+      <Dialog open={isDragAssignmentModalOpen} onOpenChange={setIsDragAssignmentModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Assignment from {draggedItem?.type?.toUpperCase()} Item</DialogTitle>
+            <DialogDescription>
+              Complete the details for this resource assignment
+            </DialogDescription>
+          </DialogHeader>
+          {draggedItem && (
+            <div className="bg-gray-50 p-3 rounded-lg mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                {draggedItem.type === 'priority' ? (
+                  <AlertTriangle className="h-4 w-4 text-orange-600" />
+                ) : (
+                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                )}
+                <Badge variant="outline">{draggedItem.item.ref}</Badge>
               </div>
-              
-              <div className="flex items-center gap-2">
-                <Select value={calendarView} onValueChange={(value: CalendarView) => setCalendarView(value)}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
+              <p className="font-medium">{draggedItem.item.summary}</p>
+              <p className="text-sm text-gray-600">{draggedItem.item.companyName}</p>
+            </div>
+          )}
+          <form onSubmit={handleCreateDragAssignment}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="assignee">Assigned To *</Label>
+                <Select 
+                  value={assignmentForm.assignedToId} 
+                  onValueChange={(value) => setAssignmentForm(prev => ({ ...prev, assignedToId: value }))}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select assignee" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="month">Month</SelectItem>
-                    <SelectItem value="week">Week</SelectItem>
-                    <SelectItem value="day">Day</SelectItem>
+                    {users.filter(user => user._id).map((user) => (
+                      <SelectItem key={user._id!.toString()} value={user._id!.toString()}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            {/* Calendar Display */}
-            <div className="border rounded-lg p-4 bg-white">
-              {calendarView === 'month' && renderMonthView()}
-              {calendarView === 'week' && renderWeekView()}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="overview" className="space-y-4">
-            {stats && (
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold">{stats.totalAssignments}</div>
-                    <p className="text-sm text-muted-foreground">Total</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-blue-600">{stats.scheduled}</div>
-                    <p className="text-sm text-muted-foreground">Scheduled</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
-                    <p className="text-sm text-muted-foreground">In Progress</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-                    <p className="text-sm text-muted-foreground">Completed</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-red-600">{stats.cancelled}</div>
-                    <p className="text-sm text-muted-foreground">Cancelled</p>
-                  </CardContent>
-                </Card>
+              <div className="grid gap-2">
+                <Label htmlFor="priority">Priority *</Label>
+                <Select 
+                  value={assignmentForm.priority} 
+                  onValueChange={(value) => setAssignmentForm(prev => ({ ...prev, priority: value as "Low" | "Medium" | "High" | "Critical" }))}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                    <SelectItem value="Critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            )}
 
-            {stats?.upcomingDeadlines && stats.upcomingDeadlines.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Upcoming Deadlines</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {stats.upcomingDeadlines.map((assignment) => (
-                      <div key={assignment._id?.toString()} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{assignment.title}</h4>
-                          <p className="text-sm text-gray-600">{assignment.description}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge className={getStatusColor(assignment.status)}>
-                              {assignment.status}
-                            </Badge>
-                            <span className="text-xs text-gray-500">
-                              Due: {formatDate(assignment.endDate)}
-                            </span>
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedAssignment(assignment)
-                            setIsDetailModalOpen(true)
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
-
-        {/* Assignment Detail Modal */}
-        <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-          <DialogContent className="max-w-2xl">
-            {selectedAssignment && (
-              <>
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <CalendarDays className="h-5 w-5" />
-                    {selectedAssignment.title}
-                  </DialogTitle>
-                  <DialogDescription>
-                    Assignment details and information
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500">Assigned To</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <User className="h-4 w-4" />
-                        {selectedAssignment.assignedToName}
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500">Priority</Label>
-                      <div className="mt-1">
-                        <Badge className={getPriorityColor(selectedAssignment.priority)}>
-                          {selectedAssignment.priority}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {selectedAssignment.description && (
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500">Description</Label>
-                      <p className="mt-1">{selectedAssignment.description}</p>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500">Start Date</Label>
-                      <p className="mt-1">{formatDate(selectedAssignment.startDate)}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500">End Date</Label>
-                      <p className="mt-1">{formatDate(selectedAssignment.endDate)}</p>
-                    </div>
-                  </div>
-
-                  {!selectedAssignment.isAllDay && selectedAssignment.startTime && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium text-gray-500">Start Time</Label>
-                        <p className="mt-1">{formatTime(selectedAssignment.startTime)}</p>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-500">End Time</Label>
-                        <p className="mt-1">{formatTime(selectedAssignment.endTime)}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedAssignment.linkedItemRef && (
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500">Linked Item</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline">
-                          {selectedAssignment.linkedItemType?.toUpperCase()}: {selectedAssignment.linkedItemRef}
-                        </Badge>
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedAssignment.location && (
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500">Location</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Building className="h-4 w-4" />
-                        {selectedAssignment.location}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedAssignment.estimatedHours && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium text-gray-500">Estimated Hours</Label>
-                        <p className="mt-1">{selectedAssignment.estimatedHours}h</p>
-                      </div>
-                      {selectedAssignment.actualHours && (
-                        <div>
-                          <Label className="text-sm font-medium text-gray-500">Actual Hours</Label>
-                          <p className="mt-1">{selectedAssignment.actualHours}h</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {selectedAssignment.notes && (
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500">Notes</Label>
-                      <p className="mt-1 text-sm">{selectedAssignment.notes}</p>
-                    </div>
-                  )}
+              <div className="grid gap-2">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="allDay"
+                    checked={assignmentForm.isAllDay}
+                    onCheckedChange={(checked) => setAssignmentForm(prev => ({ ...prev, isAllDay: checked }))}
+                  />
+                  <Label htmlFor="allDay">All Day</Label>
                 </div>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
-      </CardContent>
-    </Card>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Start Date *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(assignmentForm.startDate, "PPP")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={assignmentForm.startDate}
+                        onSelect={(date) => date && setAssignmentForm(prev => ({ ...prev, startDate: date }))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>End Date *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(assignmentForm.endDate, "PPP")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={assignmentForm.endDate}
+                        onSelect={(date) => date && setAssignmentForm(prev => ({ ...prev, endDate: date }))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              {!assignmentForm.isAllDay && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="startTime">Start Time</Label>
+                    <Input
+                      id="startTime"
+                      type="time"
+                      value={assignmentForm.startTime}
+                      onChange={(e) => setAssignmentForm(prev => ({ ...prev, startTime: e.target.value }))}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="endTime">End Time</Label>
+                    <Input
+                      id="endTime"
+                      type="time"
+                      value={assignmentForm.endTime}
+                      onChange={(e) => setAssignmentForm(prev => ({ ...prev, endTime: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    value={assignmentForm.location}
+                    onChange={(e) => setAssignmentForm(prev => ({ ...prev, location: e.target.value }))}
+                    placeholder="Office, Remote, Client site..."
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                  <Input
+                    id="estimatedHours"
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    value={assignmentForm.estimatedHours}
+                    onChange={(e) => setAssignmentForm(prev => ({ ...prev, estimatedHours: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={assignmentForm.notes}
+                  onChange={(e) => setAssignmentForm(prev => ({ ...prev, notes: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsDragAssignmentModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Create Assignment</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assignment Detail Modal */}
+      <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+        <DialogContent className="max-w-2xl">
+          {selectedAssignment && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <CalendarDays className="h-5 w-5" />
+                  {selectedAssignment.title}
+                </DialogTitle>
+                <DialogDescription>
+                  Assignment details and information
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Assigned To</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <User className="h-4 w-4" />
+                      {selectedAssignment.assignedToName}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Priority</Label>
+                    <div className="mt-1">
+                      <Badge className={getPriorityColor(selectedAssignment.priority)}>
+                        {selectedAssignment.priority}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedAssignment.description && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Description</Label>
+                    <p className="mt-1">{selectedAssignment.description}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Start Date</Label>
+                    <p className="mt-1">{formatDate(selectedAssignment.startDate)}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">End Date</Label>
+                    <p className="mt-1">{formatDate(selectedAssignment.endDate)}</p>
+                  </div>
+                </div>
+
+                {!selectedAssignment.isAllDay && selectedAssignment.startTime && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">Start Time</Label>
+                      <p className="mt-1">{formatTime(selectedAssignment.startTime)}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">End Time</Label>
+                      <p className="mt-1">{formatTime(selectedAssignment.endTime)}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAssignment.linkedItemRef && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Linked Item</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="outline">
+                        {selectedAssignment.linkedItemType?.toUpperCase()}: {selectedAssignment.linkedItemRef}
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+
+                {selectedAssignment.location && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Location</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Building className="h-4 w-4" />
+                      {selectedAssignment.location}
+                    </div>
+                  </div>
+                )}
+
+                {selectedAssignment.estimatedHours && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">Estimated Hours</Label>
+                      <p className="mt-1">{selectedAssignment.estimatedHours}h</p>
+                    </div>
+                    {selectedAssignment.actualHours && (
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Actual Hours</Label>
+                        <p className="mt-1">{selectedAssignment.actualHours}h</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {selectedAssignment.notes && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Notes</Label>
+                    <p className="mt-1 text-sm">{selectedAssignment.notes}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </DndContext>
   )
 }
