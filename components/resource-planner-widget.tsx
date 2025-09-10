@@ -15,27 +15,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
-import { CalendarDays, Plus, Eye, Clock, User, Building, AlertCircle, CheckCircle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Users, GripVertical, AlertTriangle, TrendingUp, ExternalLink, Ticket } from "lucide-react"
+import { CalendarDays, Plus, Eye, Clock, User, Building, AlertCircle, CheckCircle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Users, AlertTriangle, TrendingUp, ExternalLink, Ticket } from "lucide-react"
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths } from "date-fns"
 import { ResourceAssignment } from "@/lib/models/ResourcePlanner"
 import { User as UserType } from "@/lib/models/User"
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
-  Active,
-  Over,
-} from "@dnd-kit/core"
-import {
-  useDraggable,
-  useDroppable,
-} from "@dnd-kit/core"
 
 interface ResourcePlannerStats {
   totalAssignments: number
@@ -68,114 +51,44 @@ interface LinkedItems {
   }>
 }
 
-interface DragData {
-  item: LinkedItems['priority'][0] | LinkedItems['csi'][0]
-  type: 'priority' | 'csi'
+interface ContextMenuData {
+  x: number
+  y: number
+  selectedDates: Date[]
 }
 
 type CalendarView = 'month' | 'week' | 'day'
 
-// Draggable item component
-function DraggableItem({ item, type }: { item: LinkedItems['priority'][0] | LinkedItems['csi'][0], type: 'priority' | 'csi' }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    isDragging,
-  } = useDraggable({
-    id: `${type}-${item._id}`,
-    data: {
-      item,
-      type,
-    } as DragData
-  })
-
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-  } : undefined
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className={`p-3 rounded-lg border cursor-grab active:cursor-grabbing transition-all ${
-        isDragging ? 'opacity-50' : ''
-      } ${
-        type === 'priority' 
-          ? 'bg-orange-50 border-orange-200 hover:bg-orange-100' 
-          : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
-      }`}
-    >
-      <div className="flex items-start gap-2">
-        <GripVertical className="h-4 w-4 text-gray-400 mt-0.5" />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            {type === 'priority' ? (
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-            ) : (
-              <TrendingUp className="h-4 w-4 text-blue-600" />
-            )}
-            <Badge variant="outline" className="text-xs">
-              {item.ref}
-            </Badge>
-          </div>
-          <p className="font-medium text-sm truncate">{item.summary}</p>
-          <div className="flex items-center gap-2 mt-1">
-            <User className="h-3 w-3 text-gray-400" />
-            <span className="text-xs text-gray-600">{item.assignedToName}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Building className="h-3 w-3 text-gray-400" />
-            <span className="text-xs text-gray-600">{item.companyName}</span>
-          </div>
-          {'percentComplete' in item && (
-            <div className="mt-1">
-              <Badge className="bg-blue-100 text-blue-800 text-xs">
-                {item.percentComplete}% Complete
-              </Badge>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Droppable calendar day component
-function DroppableCalendarDay({ 
+// Calendar day component with selection and context menu
+function SelectableCalendarDay({ 
   day, 
   isCurrentMonth, 
-  assignments, 
+  assignments,
+  isSelected,
   onDayClick,
+  onDayRightClick,
   getPriorityColor 
 }: { 
   day: Date
   isCurrentMonth: boolean
   assignments: ResourceAssignment[]
-  onDayClick: (assignment: ResourceAssignment) => void
+  isSelected: boolean
+  onDayClick: (day: Date) => void
+  onDayRightClick: (day: Date, event: React.MouseEvent) => void
   getPriorityColor: (priority: string) => string
 }) {
-  const {
-    isOver,
-    setNodeRef
-  } = useDroppable({
-    id: day.toISOString(),
-    data: {
-      date: day,
-    }
-  })
-
   return (
     <div
-      ref={setNodeRef}
-      className={`min-h-24 p-1 border border-gray-200 transition-colors ${
+      className={`min-h-24 p-1 border border-gray-200 transition-colors cursor-pointer select-none ${
         isCurrentMonth ? 'bg-white' : 'bg-gray-50'
       } ${isToday(day) ? 'ring-2 ring-blue-500' : ''} ${
-        isOver ? 'bg-green-50 border-green-300' : ''
-      }`}
+        isSelected ? 'bg-blue-100 border-blue-400' : ''
+      } hover:bg-gray-100`}
+      onClick={() => onDayClick(day)}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        onDayRightClick(day, e)
+      }}
     >
       <div className={`text-sm ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'} ${isToday(day) ? 'font-bold' : ''}`}>
         {format(day, 'd')}
@@ -185,7 +98,10 @@ function DroppableCalendarDay({
           <div
             key={assignment._id?.toString()}
             className={`px-2 py-1 rounded text-xs cursor-pointer hover:opacity-80 ${getPriorityColor(assignment.priority)}`}
-            onClick={() => onDayClick(assignment)}
+            onClick={(e) => {
+              e.stopPropagation()
+              // Handle assignment click if needed
+            }}
           >
             <div className="font-medium truncate">{assignment.title}</div>
             <div className="text-xs opacity-75">{assignment.assignedToName}</div>
@@ -201,6 +117,133 @@ function DroppableCalendarDay({
   )
 }
 
+// Context menu component
+function ContextMenu({ 
+  isOpen, 
+  position, 
+  linkedItems, 
+  onSelectItem, 
+  onClose 
+}: {
+  isOpen: boolean
+  position: { x: number, y: number }
+  linkedItems: LinkedItems | null
+  onSelectItem: (item: LinkedItems['priority'][0] | LinkedItems['csi'][0], type: 'priority' | 'csi') => void
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const handleClickOutside = () => onClose()
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+
+    if (isOpen) {
+      document.addEventListener('click', handleClickOutside)
+      document.addEventListener('keydown', handleEscape)
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen, onClose])
+
+  if (!isOpen || !linkedItems) return null
+
+  return (
+    <div
+      className="fixed bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-2 min-w-80 max-h-96 overflow-hidden"
+      style={{ left: position.x, top: position.y }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <ScrollArea className="max-h-80">
+        <div className="px-3 py-2 text-sm font-medium text-gray-700 border-b">
+          Assign Task to Selected Date(s)
+        </div>
+        
+        {linkedItems.priority.length > 0 && (
+          <div>
+            <div className="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50 flex items-center gap-2">
+              <AlertTriangle className="h-3 w-3 text-orange-600" />
+              Priority Items ({linkedItems.priority.length})
+            </div>
+            {linkedItems.priority.map((item) => (
+              <div
+                key={`priority-${item._id}`}
+                className="px-3 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
+                onClick={() => onSelectItem(item, 'priority')}
+              >
+                <div className="flex items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs bg-orange-50">
+                        {item.ref}
+                      </Badge>
+                    </div>
+                    <p className="font-medium text-sm truncate">{item.summary}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <User className="h-3 w-3 text-gray-400" />
+                      <span className="text-xs text-gray-600">{item.assignedToName}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Building className="h-3 w-3 text-gray-400" />
+                      <span className="text-xs text-gray-600">{item.companyName}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {linkedItems.csi.length > 0 && (
+          <div>
+            <div className="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50 flex items-center gap-2">
+              <TrendingUp className="h-3 w-3 text-blue-600" />
+              CSI Items ({linkedItems.csi.length})
+            </div>
+            {linkedItems.csi.map((item) => (
+              <div
+                key={`csi-${item._id}`}
+                className="px-3 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
+                onClick={() => onSelectItem(item, 'csi')}
+              >
+                <div className="flex items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs bg-blue-50">
+                        {item.ref}
+                      </Badge>
+                      <Badge className="bg-blue-100 text-blue-800 text-xs">
+                        {item.percentComplete}%
+                      </Badge>
+                    </div>
+                    <p className="font-medium text-sm truncate">{item.summary}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <User className="h-3 w-3 text-gray-400" />
+                      <span className="text-xs text-gray-600">{item.assignedToName}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Building className="h-3 w-3 text-gray-400" />
+                      <span className="text-xs text-gray-600">{item.companyName}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {linkedItems.priority.length === 0 && linkedItems.csi.length === 0 && (
+          <div className="px-3 py-4 text-sm text-gray-500 text-center">
+            No Priority or CSI items available for assignment
+          </div>
+        )}
+      </ScrollArea>
+    </div>
+  )
+}
+
 export default function ResourcePlannerWidget() {
   const { data: session } = useSession()
   const [assignments, setAssignments] = useState<ResourceAssignment[]>([])
@@ -212,10 +255,13 @@ export default function ResourcePlannerWidget() {
   const [calendarView, setCalendarView] = useState<CalendarView>('month')
   const [selectedAssignment, setSelectedAssignment] = useState<ResourceAssignment | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const [isDragAssignmentModalOpen, setIsDragAssignmentModalOpen] = useState(false)
-  const [draggedItem, setDraggedItem] = useState<DragData | null>(null)
-  const [dropDate, setDropDate] = useState<Date | null>(null)
-  const [activeDragId, setActiveDragId] = useState<string | null>(null)
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false)
+  const [selectedDates, setSelectedDates] = useState<Date[]>([])
+  const [contextMenu, setContextMenu] = useState<ContextMenuData | null>(null)
+  const [selectedItem, setSelectedItem] = useState<{
+    item: LinkedItems['priority'][0] | LinkedItems['csi'][0]
+    type: 'priority' | 'csi'
+  } | null>(null)
   const [linkedTickets, setLinkedTickets] = useState<{
     freshdeskTickets: string[]
     jiraTickets: string[]
@@ -234,15 +280,6 @@ export default function ResourcePlannerWidget() {
     estimatedHours: "",
     notes: ""
   })
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor)
-  )
 
   useEffect(() => {
     fetchData()
@@ -333,46 +370,70 @@ export default function ResourcePlannerWidget() {
     }
   }
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveDragId(String(event.active.id))
+  const handleDayClick = (day: Date) => {
+    setSelectedDates(prev => {
+      const isAlreadySelected = prev.some(d => isSameDay(d, day))
+      if (isAlreadySelected) {
+        return prev.filter(d => !isSameDay(d, day))
+      } else {
+        return [...prev, day]
+      }
+    })
   }
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    setActiveDragId(null)
+  const handleDayRightClick = (day: Date, event: React.MouseEvent) => {
+    // Add day to selection if not already selected
+    setSelectedDates(prev => {
+      const isAlreadySelected = prev.some(d => isSameDay(d, day))
+      if (!isAlreadySelected) {
+        return [...prev, day]
+      }
+      return prev
+    })
 
-    if (!over || !active.data.current) return
+    // Show context menu
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      selectedDates: selectedDates.some(d => isSameDay(d, day)) 
+        ? selectedDates 
+        : [...selectedDates, day]
+    })
+  }
 
-    const dragData = active.data.current as DragData
-    const dropDateData = new Date(over.id as string)
+  const handleContextMenuSelect = (item: LinkedItems['priority'][0] | LinkedItems['csi'][0], type: 'priority' | 'csi') => {
+    setSelectedItem({ item, type })
+    setContextMenu(null)
 
-    setDraggedItem(dragData)
-    setDropDate(dropDateData)
-    
-    // Pre-fill form with dragged item data
+    // Calculate date range from selected dates
+    const sortedDates = (contextMenu?.selectedDates || selectedDates).sort((a, b) => a.getTime() - b.getTime())
+    const startDate = sortedDates[0]
+    const endDate = sortedDates[sortedDates.length - 1]
+
+    // Pre-fill form with selected item data
     setAssignmentForm(prev => ({
       ...prev,
-      startDate: dropDateData,
-      endDate: dropDateData,
+      startDate,
+      endDate,
       assignedToId: "",
-      assignedToName: dragData.item.assignedToName,
+      assignedToName: item.assignedToName,
       isAllDay: true
     }))
     
-    setIsDragAssignmentModalOpen(true)
+    setIsAssignmentModalOpen(true)
   }
 
-  const handleCreateDragAssignment = async (e: React.FormEvent) => {
+  const handleCreateAssignment = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!draggedItem || !dropDate) return
+    if (!selectedItem) return
 
     const selectedUser = users.find(u => u._id?.toString() === assignmentForm.assignedToId)
     if (!selectedUser) return
 
     const payload = {
-      title: draggedItem.item.summary,
-      description: `Assignment for ${draggedItem.type.toUpperCase()} item: ${draggedItem.item.ref}`,
+      title: selectedItem.item.summary,
+      description: `Assignment for ${selectedItem.type.toUpperCase()} item: ${selectedItem.item.ref}`,
       assignedToId: assignmentForm.assignedToId,
       assignedToName: selectedUser.name,
       startDate: assignmentForm.startDate.toISOString(),
@@ -381,9 +442,9 @@ export default function ResourcePlannerWidget() {
       endTime: assignmentForm.endTime || undefined,
       isAllDay: assignmentForm.isAllDay,
       priority: assignmentForm.priority,
-      linkedItemId: draggedItem.item._id,
-      linkedItemType: draggedItem.type,
-      linkedItemRef: draggedItem.item.ref,
+      linkedItemId: selectedItem.item._id,
+      linkedItemType: selectedItem.type,
+      linkedItemRef: selectedItem.item.ref,
       location: assignmentForm.location || undefined,
       estimatedHours: assignmentForm.estimatedHours ? parseFloat(assignmentForm.estimatedHours) : undefined,
       notes: assignmentForm.notes || undefined
@@ -397,8 +458,9 @@ export default function ResourcePlannerWidget() {
       })
 
       if (response.ok) {
-        setIsDragAssignmentModalOpen(false)
+        setIsAssignmentModalOpen(false)
         resetAssignmentForm()
+        setSelectedDates([])
         fetchData()
       }
     } catch (error) {
@@ -420,8 +482,7 @@ export default function ResourcePlannerWidget() {
       estimatedHours: "",
       notes: ""
     })
-    setDraggedItem(null)
-    setDropDate(null)
+    setSelectedItem(null)
   }
 
   const getPriorityColor = (priority: string) => {
@@ -499,18 +560,17 @@ export default function ResourcePlannerWidget() {
         {calendarDays.map(day => {
           const dayAssignments = getAssignmentsForDate(day)
           const isCurrentMonth = day >= monthStart && day <= monthEnd
+          const isSelected = selectedDates.some(d => isSameDay(d, day))
           
           return (
-            <DroppableCalendarDay
+            <SelectableCalendarDay
               key={day.toISOString()}
               day={day}
               isCurrentMonth={isCurrentMonth}
               assignments={dayAssignments}
-              onDayClick={(assignment) => {
-                setSelectedAssignment(assignment)
-                fetchLinkedTickets(assignment)
-                setIsDetailModalOpen(true)
-              }}
+              isSelected={isSelected}
+              onDayClick={handleDayClick}
+              onDayRightClick={handleDayRightClick}
               getPriorityColor={getPriorityColor}
             />
           )
@@ -527,6 +587,7 @@ export default function ResourcePlannerWidget() {
       <div className="grid grid-cols-7 gap-4">
         {weekDays.map(day => {
           const dayAssignments = getAssignmentsForDate(day)
+          const isSelected = selectedDates.some(d => isSameDay(d, day))
           
           return (
             <div key={day.toISOString()} className="space-y-2">
@@ -534,15 +595,13 @@ export default function ResourcePlannerWidget() {
                 <div className="text-sm text-gray-500">{format(day, 'EEE')}</div>
                 <div className="text-lg">{format(day, 'd')}</div>
               </div>
-              <DroppableCalendarDay
+              <SelectableCalendarDay
                 day={day}
                 isCurrentMonth={true}
                 assignments={dayAssignments}
-                onDayClick={(assignment) => {
-                  setSelectedAssignment(assignment)
-                  fetchLinkedTickets(assignment)
-                  setIsDetailModalOpen(true)
-                }}
+                isSelected={isSelected}
+                onDayClick={handleDayClick}
+                onDayRightClick={handleDayRightClick}
                 getPriorityColor={getPriorityColor}
               />
             </div>
@@ -563,249 +622,195 @@ export default function ResourcePlannerWidget() {
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar with draggable items */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <GripVertical className="h-5 w-5" />
-                Drag & Drop Items
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Drag Priority or CSI items onto calendar dates to schedule assignments
-              </p>
-            </CardHeader>
-            <CardContent>
-              {linkedItems && (
-                <div className="space-y-4">
-                  {linkedItems.priority.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-700 mb-2 flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-orange-600" />
-                        Priority Items ({linkedItems.priority.length})
-                      </h4>
-                      <ScrollArea className="h-64">
-                        <div className="space-y-2">
-                          {linkedItems.priority.map((item) => (
-                            <DraggableItem key={`priority-${item._id}`} item={item} type="priority" />
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
-                  
-                  {linkedItems.csi.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-700 mb-2 flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-blue-600" />
-                        CSI Items ({linkedItems.csi.length})
-                      </h4>
-                      <ScrollArea className="h-64">
-                        <div className="space-y-2">
-                          {linkedItems.csi.map((item) => (
-                            <DraggableItem key={`csi-${item._id}`} item={item} type="csi" />
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
-                  
-                  {linkedItems.priority.length === 0 && linkedItems.csi.length === 0 && (
-                    <p className="text-sm text-gray-500 italic text-center py-8">
-                      No Priority or CSI items available for assignment
-                    </p>
-                  )}
+    <div className="space-y-6">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-green-600" />
+            Resource Planner Calendar
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Click dates to select them, then right-click to assign tasks from Priority or CSI items
+          </p>
+          {selectedDates.length > 0 && (
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="secondary">
+                {selectedDates.length} date{selectedDates.length !== 1 ? 's' : ''} selected
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedDates([])}
+              >
+                Clear Selection
+              </Button>
+            </div>
+          )}
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="calendar" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="calendar" className="space-y-4">
+              {/* Calendar Controls */}
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => navigateCalendar('prev')}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
+                    Today
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => navigateCalendar('next')}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <h3 className="text-lg font-semibold ml-4">
+                    {calendarView === 'month' && format(selectedDate, 'MMMM yyyy')}
+                    {calendarView === 'week' && `Week of ${format(startOfWeek(selectedDate, { weekStartsOn: 1 }), 'MMM dd, yyyy')}`}
+                    {calendarView === 'day' && format(selectedDate, 'EEEE, MMM dd, yyyy')}
+                  </h3>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Select value={calendarView} onValueChange={(value: CalendarView) => setCalendarView(value)}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="month">Month</SelectItem>
+                      <SelectItem value="week">Week</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Calendar Display */}
+              <div className="border rounded-lg p-4 bg-white">
+                {calendarView === 'month' && renderMonthView()}
+                {calendarView === 'week' && renderWeekView()}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="overview" className="space-y-4">
+              {stats && (
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold">{stats.totalAssignments}</div>
+                      <p className="text-sm text-muted-foreground">Total</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-blue-600">{stats.scheduled}</div>
+                      <p className="text-sm text-muted-foreground">Scheduled</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
+                      <p className="text-sm text-muted-foreground">In Progress</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+                      <p className="text-sm text-muted-foreground">Completed</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-red-600">{stats.cancelled}</div>
+                      <p className="text-sm text-muted-foreground">Cancelled</p>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Main calendar area */}
-        <div className="lg:col-span-3">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-green-600" />
-                Resource Planner Calendar
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Drop items from the sidebar onto dates to create assignments
-              </p>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="calendar" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="calendar" className="space-y-4">
-                  {/* Calendar Controls */}
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => navigateCalendar('prev')}>
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
-                        Today
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => navigateCalendar('next')}>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                      <h3 className="text-lg font-semibold ml-4">
-                        {calendarView === 'month' && format(selectedDate, 'MMMM yyyy')}
-                        {calendarView === 'week' && `Week of ${format(startOfWeek(selectedDate, { weekStartsOn: 1 }), 'MMM dd, yyyy')}`}
-                        {calendarView === 'day' && format(selectedDate, 'EEEE, MMM dd, yyyy')}
-                      </h3>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Select value={calendarView} onValueChange={(value: CalendarView) => setCalendarView(value)}>
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="month">Month</SelectItem>
-                          <SelectItem value="week">Week</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Calendar Display */}
-                  <div className="border rounded-lg p-4 bg-white">
-                    {calendarView === 'month' && renderMonthView()}
-                    {calendarView === 'week' && renderWeekView()}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="overview" className="space-y-4">
-                  {stats && (
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold">{stats.totalAssignments}</div>
-                          <p className="text-sm text-muted-foreground">Total</p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-blue-600">{stats.scheduled}</div>
-                          <p className="text-sm text-muted-foreground">Scheduled</p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
-                          <p className="text-sm text-muted-foreground">In Progress</p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-                          <p className="text-sm text-muted-foreground">Completed</p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-red-600">{stats.cancelled}</div>
-                          <p className="text-sm text-muted-foreground">Cancelled</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )}
-
-                  {stats?.upcomingDeadlines && stats.upcomingDeadlines.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Upcoming Deadlines</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          {stats.upcomingDeadlines.map((assignment) => (
-                            <div key={assignment._id?.toString()} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                              <div className="flex-1">
-                                <h4 className="font-medium">{assignment.title}</h4>
-                                <p className="text-sm text-gray-600">{assignment.description}</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge className={getStatusColor(assignment.status)}>
-                                    {assignment.status}
-                                  </Badge>
-                                  <span className="text-xs text-gray-500">
-                                    Due: {formatDate(assignment.endDate)}
-                                  </span>
-                                </div>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedAssignment(assignment)
-                                  fetchLinkedTickets(assignment)
-                                  setIsDetailModalOpen(true)
-                                }}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
+              {stats?.upcomingDeadlines && stats.upcomingDeadlines.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Upcoming Deadlines</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {stats.upcomingDeadlines.map((assignment) => (
+                        <div key={assignment._id?.toString()} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                          <div className="flex-1">
+                            <h4 className="font-medium">{assignment.title}</h4>
+                            <p className="text-sm text-gray-600">{assignment.description}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge className={getStatusColor(assignment.status)}>
+                                {assignment.status}
+                              </Badge>
+                              <span className="text-xs text-gray-500">
+                                Due: {formatDate(assignment.endDate)}
+                              </span>
                             </div>
-                          ))}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedAssignment(assignment)
+                              fetchLinkedTickets(assignment)
+                              setIsDetailModalOpen(true)
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
-      {/* Drag overlay */}
-      <DragOverlay dropAnimation={null}>
-        {activeDragId && linkedItems && (() => {
-          const [type, id] = activeDragId.split('-')
-          const items = type === 'priority' ? linkedItems.priority : linkedItems.csi
-          const item = items.find(item => item._id === id)
-          return item ? (
-            <div className="rotate-6 opacity-90 scale-105 shadow-xl">
-              <DraggableItem item={item} type={type as 'priority' | 'csi'} />
-            </div>
-          ) : null
-        })()}
-      </DragOverlay>
+      {/* Context Menu */}
+      <ContextMenu
+        isOpen={!!contextMenu}
+        position={contextMenu ? { x: contextMenu.x, y: contextMenu.y } : { x: 0, y: 0 }}
+        linkedItems={linkedItems}
+        onSelectItem={handleContextMenuSelect}
+        onClose={() => setContextMenu(null)}
+      />
 
-      {/* Drag Assignment Modal */}
-      <Dialog open={isDragAssignmentModalOpen} onOpenChange={setIsDragAssignmentModalOpen}>
+      {/* Assignment Creation Modal */}
+      <Dialog open={isAssignmentModalOpen} onOpenChange={setIsAssignmentModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create Assignment from {draggedItem?.type?.toUpperCase()} Item</DialogTitle>
+            <DialogTitle>Create Assignment from {selectedItem?.type?.toUpperCase()} Item</DialogTitle>
             <DialogDescription>
               Complete the details for this resource assignment
             </DialogDescription>
           </DialogHeader>
-          {draggedItem && (
+          {selectedItem && (
             <div className="bg-gray-50 p-3 rounded-lg mb-4">
               <div className="flex items-center gap-2 mb-2">
-                {draggedItem.type === 'priority' ? (
+                {selectedItem.type === 'priority' ? (
                   <AlertTriangle className="h-4 w-4 text-orange-600" />
                 ) : (
                   <TrendingUp className="h-4 w-4 text-blue-600" />
                 )}
-                <Badge variant="outline">{draggedItem.item.ref}</Badge>
+                <Badge variant="outline">{selectedItem.item.ref}</Badge>
+                {'percentComplete' in selectedItem.item && (
+                  <Badge className="bg-blue-100 text-blue-800 text-xs">
+                    {selectedItem.item.percentComplete}% Complete
+                  </Badge>
+                )}
               </div>
-              <p className="font-medium">{draggedItem.item.summary}</p>
-              <p className="text-sm text-gray-600">{draggedItem.item.companyName}</p>
+              <p className="font-medium">{selectedItem.item.summary}</p>
+              <p className="text-sm text-gray-600">{selectedItem.item.companyName}</p>
             </div>
           )}
-          <form onSubmit={handleCreateDragAssignment}>
+          <form onSubmit={handleCreateAssignment}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="assignee">Assigned To *</Label>
@@ -956,7 +961,7 @@ export default function ResourcePlannerWidget() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDragAssignmentModalOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsAssignmentModalOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit">Create Assignment</Button>
@@ -1120,6 +1125,6 @@ export default function ResourcePlannerWidget() {
           )}
         </DialogContent>
       </Dialog>
-    </DndContext>
+    </div>
   )
 }
