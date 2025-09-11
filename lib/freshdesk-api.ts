@@ -162,6 +162,10 @@ export class FreshdeskAPI {
     return this.makeRequest<any[]>('/ticket_fields');
   }
 
+  async getTicketStatuses(): Promise<FreshdeskApiResponse<any[]>> {
+    return this.makeRequest<any[]>('/ticket_fields/status');
+  }
+
   async searchTickets(query: string): Promise<FreshdeskApiResponse<FreshdeskTicket[]>> {
     const encodedQuery = encodeURIComponent(query);
     return this.makeRequest<FreshdeskTicket[]>(`/search/tickets?query="${encodedQuery}"`);

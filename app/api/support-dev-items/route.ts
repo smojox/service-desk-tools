@@ -71,6 +71,60 @@ async function getJiraTicketInfo(jiraClient: JiraClient, ticketKey: string): Pro
   }
 }
 
+async function findWithDevelopmentStatusId(freshdeskAPI: any): Promise<number | null> {
+  try {
+    // Get all ticket statuses to find the ID for "With Development"
+    const statusesResponse = await freshdeskAPI.getTicketStatuses();
+    
+    if (statusesResponse.error || !statusesResponse.data) {
+      console.warn('Could not fetch ticket statuses, trying ticket fields endpoint');
+      
+      // Fallback: Get all ticket fields and find status field
+      const fieldsResponse = await freshdeskAPI.getTicketFields();
+      if (fieldsResponse.error || !fieldsResponse.data) {
+        return null;
+      }
+      
+      // Find the status field
+      const statusField = fieldsResponse.data.find((field: any) => 
+        field.name === 'status' || field.label === 'Status'
+      );
+      
+      if (statusField?.choices) {
+        const withDevChoice = statusField.choices.find((choice: any) =>
+          choice.value?.toLowerCase().includes('development') ||
+          choice.label?.toLowerCase().includes('development') ||
+          choice.value?.toLowerCase().includes('dev') ||
+          choice.label?.toLowerCase().includes('dev')
+        );
+        
+        if (withDevChoice) {
+          console.log(`Found "With Development" status with ID: ${withDevChoice.id}`);
+          return withDevChoice.id;
+        }
+      }
+    } else {
+      // Direct status endpoint response
+      const withDevStatus = statusesResponse.data.find((status: any) =>
+        status.name?.toLowerCase().includes('development') ||
+        status.label?.toLowerCase().includes('development') ||
+        status.name?.toLowerCase().includes('dev') ||
+        status.label?.toLowerCase().includes('dev')
+      );
+      
+      if (withDevStatus) {
+        console.log(`Found "With Development" status with ID: ${withDevStatus.id}`);
+        return withDevStatus.id;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error finding With Development status ID:', error);
+    return null;
+  }
+}
+
 export async function GET() {
   try {
     const freshdeskDomain = process.env.NEXT_PUBLIC_FRESHDESK_DOMAIN;
@@ -94,43 +148,53 @@ export async function GET() {
     const freshdeskAPI = createFreshdeskAPI(freshdeskDomain, freshdeskApiKey);
     const jiraClient = new JiraClient();
 
-    // Search for tickets with "With Development" status
-    // Try multiple approaches to find "With Development" tickets
+    // Step 1: Find the correct status ID for "With Development"
+    const withDevStatusId = await findWithDevelopmentStatusId(freshdeskAPI);
+    
     let ticketsResponse;
     
-    // Approach 1: Search by status name
-    ticketsResponse = await freshdeskAPI.searchTickets('status:"With Development"');
-    
-    if (ticketsResponse.error) {
-      console.warn('Search by status name failed, trying status ID approach');
+    if (withDevStatusId) {
+      console.log(`Searching for tickets with status ID: ${withDevStatusId}`);
+      // Use the found status ID to get tickets
+      ticketsResponse = await freshdeskAPI.getTickets(1, 100, { status: withDevStatusId });
+    } else {
+      console.log('Could not find "With Development" status ID, trying search query');
+      // Fallback to search query
+      ticketsResponse = await freshdeskAPI.searchTickets('status:"With Development"');
       
-      // Approach 2: Try common status IDs for "With Development"
-      const commonDevStatusIds = [11, 12, 13, 14, 15]; // Common IDs for development status
-      
-      for (const statusId of commonDevStatusIds) {
-        const response = await freshdeskAPI.getTickets(1, 100, { status: statusId });
-        if (!response.error && response.data && response.data.length > 0) {
-          ticketsResponse = response;
-          console.log(`Found tickets with status ID: ${statusId}`);
-          break;
-        }
-      }
-      
-      // If still no results, fall back to getting recent tickets
       if (ticketsResponse.error) {
-        console.warn('All status-specific searches failed, getting recent tickets');
-        ticketsResponse = await freshdeskAPI.getTickets(1, 50); // Get recent 50 tickets
+        // Try alternative search terms
+        const searchTerms = [
+          'status:"with development"',
+          'status:"With Dev"',
+          'status:"Development"',
+          'status:development'
+        ];
         
-        if (ticketsResponse.error) {
-          throw new Error(`Failed to fetch Freshdesk tickets: ${ticketsResponse.error}`);
+        for (const term of searchTerms) {
+          console.log(`Trying search term: ${term}`);
+          ticketsResponse = await freshdeskAPI.searchTickets(term);
+          if (!ticketsResponse.error && ticketsResponse.data && ticketsResponse.data.length > 0) {
+            console.log(`Found tickets with search term: ${term}`);
+            break;
+          }
         }
       }
     }
 
-    if (!ticketsResponse.data) {
+    if (ticketsResponse.error) {
+      console.error('All attempts to find "With Development" tickets failed');
+      return NextResponse.json({
+        success: false,
+        error: `Could not find tickets with "With Development" status: ${ticketsResponse.error}`,
+      }, { status: 500 });
+    }
+
+    if (!ticketsResponse.data || ticketsResponse.data.length === 0) {
       return NextResponse.json({
         success: true,
         data: [],
+        message: 'No tickets found with "With Development" status'
       });
     }
 
