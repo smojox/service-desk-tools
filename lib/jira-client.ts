@@ -21,6 +21,11 @@ interface JiraTicket {
     };
     created: string;
     updated: string;
+    fixVersions?: Array<{
+      name: string;
+      id: string;
+      description?: string;
+    }>;
   };
 }
 
@@ -136,6 +141,55 @@ class JiraClient {
       byAssignee,
       byPriority,
     };
+  }
+
+  async getTicketByKey(ticketKey: string): Promise<JiraTicket | null> {
+    try {
+      const url = `${this.baseUrl}/rest/api/3/issue/${ticketKey}?fields=key,summary,status,assignee,priority,created,updated,fixVersions`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${this.getAuthHeader()}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'ServiceDeskTools/1.0'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(`JIRA ticket ${ticketKey} not found`);
+          return null;
+        }
+        
+        const errorText = await response.text();
+        console.error(`JIRA API Error for ${ticketKey} - Status: ${response.status}, Response: ${errorText}`);
+        
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please check your JIRA credentials.');
+        } else if (response.status === 403) {
+          throw new Error(`Access denied for ticket ${ticketKey}. Check your permissions.`);
+        } else {
+          throw new Error(`JIRA API error: ${response.status} ${response.statusText}`);
+        }
+      }
+
+      const ticket: JiraTicket = await response.json();
+      return ticket;
+    } catch (error) {
+      console.error(`Error fetching JIRA ticket ${ticketKey}:`, error);
+      
+      if (error instanceof Error) {
+        if (error.message.includes('fetch failed')) {
+          throw new Error('Unable to connect to JIRA. Please check the JIRA URL and network connection.');
+        } else if (error.message.includes('certificate')) {
+          throw new Error('SSL certificate error. This may be a development environment issue.');
+        }
+      }
+      
+      throw error;
+    }
   }
 }
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { FileText, BarChart3, Settings, Shield, LogOut, User, Loader2, AlertCircle, Bug, AlertTriangle, TrendingUp, CalendarDays } from "lucide-react"
+import { FileText, BarChart3, Settings, Shield, LogOut, User, Loader2, AlertCircle, Bug, AlertTriangle, TrendingUp, CalendarDays, Code } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import PriorityTrackerWidget from "@/components/priority-tracker-widget"
 import PersonalSummary from "@/components/personal-summary"
@@ -235,6 +235,27 @@ export default function ToolsPage() {
                       onClick={() => router.push('/jira')}
                     >
                       Open JIRA Dashboard
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* Support Dev Items Widget */}
+                <Card className="p-6 transition-shadow cursor-pointer border-2 hover:shadow-lg border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-3 rounded-full bg-indigo-100">
+                        <Code className="h-8 w-8 text-indigo-600" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Support Dev Items</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Track Freshdesk tickets "With Development" status and their linked JIRA references
+                    </p>
+                    <Button 
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                      onClick={() => router.push('/support-dev-items')}
+                    >
+                      Open Support Dev Items
                     </Button>
                   </div>
                 </Card>
