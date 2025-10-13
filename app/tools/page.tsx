@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { FileText, BarChart3, Settings, Shield, LogOut, User, Loader2, AlertCircle, Bug, AlertTriangle, TrendingUp, CalendarDays, Code } from "lucide-react"
+import { FileText, BarChart3, Settings, Shield, LogOut, User, Loader2, AlertCircle, Bug, AlertTriangle, TrendingUp, CalendarDays, Code, Ticket } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import PriorityTrackerWidget from "@/components/priority-tracker-widget"
 import PersonalSummary from "@/components/personal-summary"
@@ -314,11 +314,32 @@ export default function ToolsPage() {
                     <p className="text-sm text-gray-600 mb-4">
                       Schedule and assign tasks with calendar view, linking to Priority and CSI items
                     </p>
-                    <Button 
+                    <Button
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
                       onClick={() => router.push('/resource-planner')}
                     >
                       Open Resource Planner
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* Incident Management Widget */}
+                <Card className="p-6 transition-shadow cursor-pointer border-2 hover:shadow-lg border-red-200 bg-gradient-to-br from-red-50 to-pink-50">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-3 rounded-full bg-red-100">
+                        <Ticket className="h-8 w-8 text-red-600" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Incident Management</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Comprehensive incident tracking with SLA monitoring and customer portal
+                    </p>
+                    <Button
+                      className="w-full bg-red-600 hover:bg-red-700 text-white"
+                      onClick={() => router.push('/incident-management')}
+                    >
+                      Open Incident Management
                     </Button>
                   </div>
                 </Card>

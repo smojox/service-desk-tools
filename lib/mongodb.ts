@@ -51,4 +51,9 @@ export const COLLECTIONS = {
   PRIORITY_TRACKER: 'priority_tracker',
   CSI_TRACKER: 'csi_tracker',
   RESOURCE_PLANNER: 'resource_planner',
+  INCIDENTS: 'incidents',
+  COMPANIES: 'companies',
+  SLA_DEFINITIONS: 'sla_definitions',
+  PORTAL_USERS: 'portal_users',
+  INCIDENT_TEMPLATES: 'incident_templates',
 } as const
