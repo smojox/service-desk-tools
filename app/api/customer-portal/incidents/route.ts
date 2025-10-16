@@ -88,26 +88,26 @@ export async function POST(request: NextRequest) {
 
     // Map priority to urgency and impact
     // For customer portal, we derive urgency and impact from the priority they select
-    let urgency: 'low' | 'medium' | 'high' | 'critical'
-    let impact: 'low' | 'medium' | 'high' | 'critical'
+    let urgency: 'Low' | 'Medium' | 'High' | 'Critical'
+    let impact: 'Low' | 'Medium' | 'High' | 'Critical'
 
     switch (body.priority || 'medium') {
       case 'critical':
-        urgency = 'critical'
-        impact = 'critical'
+        urgency = 'Critical'
+        impact = 'Critical'
         break
       case 'high':
-        urgency = 'high'
-        impact = 'high'
+        urgency = 'High'
+        impact = 'High'
         break
       case 'low':
-        urgency = 'low'
-        impact = 'low'
+        urgency = 'Low'
+        impact = 'Low'
         break
       case 'medium':
       default:
-        urgency = 'medium'
-        impact = 'medium'
+        urgency = 'Medium'
+        impact = 'Medium'
         break
     }
 
