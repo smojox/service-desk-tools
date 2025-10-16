@@ -261,44 +261,62 @@ export class SLADefinitionModel {
     const existingDefault = await collection.findOne({ isDefault: true, active: true })
 
     if (!existingDefault) {
-      // Create a standard default SLA
-      const now = new Date()
-      const standardSLA: Omit<SLADefinition, '_id'> = {
-        name: 'Standard SLA',
-        description: 'Default SLA tier for all companies',
-        tier: 3,
-        criticalResponseHours: 1,
-        highResponseHours: 4,
-        mediumResponseHours: 8,
-        lowResponseHours: 24,
-        criticalResolutionHours: 4,
-        highResolutionHours: 24,
-        mediumResolutionHours: 72,
-        lowResolutionHours: 168,
-        useBusinessHoursOnly: false,
-        defaultBusinessHours: {
-          timezone: 'Europe/London',
-          monday: { start: '09:00', end: '17:00' },
-          tuesday: { start: '09:00', end: '17:00' },
-          wednesday: { start: '09:00', end: '17:00' },
-          thursday: { start: '09:00', end: '17:00' },
-          friday: { start: '09:00', end: '17:00' }
-        },
-        autoEscalation: true,
-        escalationThresholdPercent: 80,
-        notificationRules: {
-          notifyAt50Percent: false,
-          notifyAt80Percent: true,
-          notifyOnBreach: true,
-          emailAddresses: []
-        },
-        active: true,
-        isDefault: true,
-        createdAt: now,
-        updatedAt: now
-      }
+      // Check if "Standard SLA" already exists (but not set as default)
+      const existingStandardSLA = await collection.findOne({ name: 'Standard SLA' })
 
-      await collection.insertOne(standardSLA)
+      if (existingStandardSLA) {
+        // Update the existing one to be the default
+        const now = new Date()
+        await collection.updateOne(
+          { _id: existingStandardSLA._id },
+          {
+            $set: {
+              isDefault: true,
+              active: true,
+              updatedAt: now
+            }
+          }
+        )
+      } else {
+        // Create a new standard default SLA
+        const now = new Date()
+        const standardSLA: Omit<SLADefinition, '_id'> = {
+          name: 'Standard SLA',
+          description: 'Default SLA tier for all companies',
+          tier: 3,
+          criticalResponseHours: 1,
+          highResponseHours: 4,
+          mediumResponseHours: 8,
+          lowResponseHours: 24,
+          criticalResolutionHours: 4,
+          highResolutionHours: 24,
+          mediumResolutionHours: 72,
+          lowResolutionHours: 168,
+          useBusinessHoursOnly: false,
+          defaultBusinessHours: {
+            timezone: 'Europe/London',
+            monday: { start: '09:00', end: '17:00' },
+            tuesday: { start: '09:00', end: '17:00' },
+            wednesday: { start: '09:00', end: '17:00' },
+            thursday: { start: '09:00', end: '17:00' },
+            friday: { start: '09:00', end: '17:00' }
+          },
+          autoEscalation: true,
+          escalationThresholdPercent: 80,
+          notificationRules: {
+            notifyAt50Percent: false,
+            notifyAt80Percent: true,
+            notifyOnBreach: true,
+            emailAddresses: []
+          },
+          active: true,
+          isDefault: true,
+          createdAt: now,
+          updatedAt: now
+        }
+
+        await collection.insertOne(standardSLA)
+      }
     }
   }
 }

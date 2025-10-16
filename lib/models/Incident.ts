@@ -72,6 +72,20 @@ export interface Incident {
   slaStatus: SLAStatus
   breachReason?: string
 
+  // SLA Hold Tracking
+  isOnHold?: boolean
+  onHoldSince?: Date
+  totalHoldTime?: number // milliseconds
+  holdHistory?: Array<{
+    putOnHoldAt: Date
+    takenOffHoldAt?: Date
+    putOnHoldById: ObjectId
+    putOnHoldByName: string
+    takenOffHoldById?: ObjectId
+    takenOffHoldByName?: string
+    reason?: string
+  }>
+
   // Resolution
   resolutionNotes?: string
   internalResolutionNotes?: string
@@ -243,6 +257,9 @@ export class IncidentModel {
       dueByTime,
       responseByTime,
       slaStatus: 'Within SLA',
+      isOnHold: false,
+      totalHoldTime: 0,
+      holdHistory: [],
       linkedFreshdeskTickets: data.linkedFreshdeskTickets || [],
       linkedJiraTickets: data.linkedJiraTickets || [],
       linkedIncidentRefs: [],
@@ -265,6 +282,40 @@ export class IncidentModel {
     }
 
     return item
+  }
+
+  static calculateSLAStatus(incident: Incident): SLAStatus {
+    // Don't update SLA status for closed incidents
+    const closedStatuses: IncidentStatus[] = ['Resolved', 'Closed', 'Cancelled']
+    if (closedStatuses.includes(incident.status)) {
+      return incident.slaStatus
+    }
+
+    const now = new Date()
+
+    // Calculate effective due time by adding total hold time
+    // This effectively "pauses" the SLA clock during hold periods
+    const totalHoldTime = incident.totalHoldTime || 0
+    const effectiveDueByTime = new Date(incident.dueByTime.getTime() + totalHoldTime)
+
+    // If currently on hold, add the current hold duration
+    let currentHoldTime = 0
+    if (incident.isOnHold && incident.onHoldSince) {
+      currentHoldTime = now.getTime() - incident.onHoldSince.getTime()
+    }
+
+    const adjustedDueByTime = new Date(effectiveDueByTime.getTime() + currentHoldTime)
+    const timeRemaining = adjustedDueByTime.getTime() - now.getTime()
+    const totalSlaTime = incident.dueByTime.getTime() - incident.createdAt.getTime()
+    const percentRemaining = (timeRemaining / totalSlaTime) * 100
+
+    if (timeRemaining <= 0) {
+      return 'Breached'
+    } else if (percentRemaining < 20) {
+      return 'At Risk'
+    } else {
+      return 'Within SLA'
+    }
   }
 
   static calculateSLATimes(
@@ -362,6 +413,12 @@ export class IncidentModel {
       collection.countDocuments(filter)
     ])
 
+    // Calculate current SLA status for display (but don't update DB - cron job handles that)
+    // Only update the in-memory objects for accurate display
+    items.forEach((incident) => {
+      incident.slaStatus = this.calculateSLAStatus(incident)
+    })
+
     return { items, total }
   }
 
@@ -371,7 +428,20 @@ export class IncidentModel {
     const collection = db.collection<Incident>(COLLECTIONS.INCIDENTS)
 
     const objectId = typeof id === 'string' ? new ObjectId(id) : id
-    return await collection.findOne({ _id: objectId })
+    const incident = await collection.findOne({ _id: objectId })
+
+    if (incident) {
+      const currentSLAStatus = this.calculateSLAStatus(incident)
+      if (currentSLAStatus !== incident.slaStatus) {
+        await collection.updateOne(
+          { _id: incident._id },
+          { $set: { slaStatus: currentSLAStatus } }
+        )
+        incident.slaStatus = currentSLAStatus
+      }
+    }
+
+    return incident
   }
 
   static async getItemByRef(ref: string): Promise<Incident | null> {
@@ -379,7 +449,20 @@ export class IncidentModel {
     const db = client.db(DB_NAME)
     const collection = db.collection<Incident>(COLLECTIONS.INCIDENTS)
 
-    return await collection.findOne({ ref })
+    const incident = await collection.findOne({ ref })
+
+    if (incident) {
+      const currentSLAStatus = this.calculateSLAStatus(incident)
+      if (currentSLAStatus !== incident.slaStatus) {
+        await collection.updateOne(
+          { _id: incident._id },
+          { $set: { slaStatus: currentSLAStatus } }
+        )
+        incident.slaStatus = currentSLAStatus
+      }
+    }
+
+    return incident
   }
 
   static async updateItem(id: string | ObjectId, updateData: UpdateIncidentData): Promise<Incident | null> {
@@ -419,6 +502,46 @@ export class IncidentModel {
 
     if (updateData.status === 'Closed' && !updateDoc.closedAt) {
       updateDoc.closedAt = new Date()
+    }
+
+    // Handle On Hold status changes - this is where SLA pause/resume happens
+    if (updateData.status) {
+      const incident = await collection.findOne({ _id: objectId })
+      if (incident) {
+        const wasOnHold = incident.status === 'On Hold'
+        const nowOnHold = updateData.status === 'On Hold'
+
+        // Putting ticket ON HOLD
+        if (!wasOnHold && nowOnHold) {
+          updateDoc.isOnHold = true
+          updateDoc.onHoldSince = new Date()
+
+          console.log(`Putting incident ${incident.ref} on hold at ${updateDoc.onHoldSince}`)
+        }
+
+        // Taking ticket OFF HOLD
+        if (wasOnHold && !nowOnHold) {
+          const now = new Date()
+          const holdDuration = incident.onHoldSince
+            ? now.getTime() - incident.onHoldSince.getTime()
+            : 0
+
+          // Add hold duration to total hold time
+          const newTotalHoldTime = (incident.totalHoldTime || 0) + holdDuration
+
+          // Update the due date by extending it with the hold duration
+          const newDueByTime = new Date(incident.dueByTime.getTime() + holdDuration)
+          const newResponseByTime = new Date(incident.responseByTime.getTime() + holdDuration)
+
+          updateDoc.isOnHold = false
+          updateDoc.onHoldSince = undefined
+          updateDoc.totalHoldTime = newTotalHoldTime
+          updateDoc.dueByTime = newDueByTime
+          updateDoc.responseByTime = newResponseByTime
+
+          console.log(`Taking incident ${incident.ref} off hold. Hold duration: ${holdDuration}ms. New due date: ${newDueByTime}`)
+        }
+      }
     }
 
     await collection.updateOne(
@@ -666,7 +789,7 @@ export class IncidentModel {
     }
   }
 
-  static async updateSLAStatuses(): Promise<void> {
+  static async updateSLAStatuses(): Promise<number> {
     const client = await clientPromise
     const db = client.db(DB_NAME)
     const collection = db.collection<Incident>(COLLECTIONS.INCIDENTS)
@@ -676,28 +799,28 @@ export class IncidentModel {
       status: { $in: openStatuses }
     }).toArray()
 
-    const now = new Date()
+    let updatedCount = 0
 
-    for (const incident of incidents) {
-      const timeRemaining = incident.dueByTime.getTime() - now.getTime()
-      const totalSlaTime = incident.dueByTime.getTime() - incident.createdAt.getTime()
-      const percentRemaining = (timeRemaining / totalSlaTime) * 100
+    // Use bulkWrite for better performance
+    const bulkOps = incidents.map((incident) => {
+      const currentSLAStatus = this.calculateSLAStatus(incident)
 
-      let newStatus: SLAStatus
-      if (timeRemaining <= 0) {
-        newStatus = 'Breached'
-      } else if (percentRemaining < 20) {
-        newStatus = 'At Risk'
-      } else {
-        newStatus = 'Within SLA'
+      if (currentSLAStatus !== incident.slaStatus) {
+        updatedCount++
+        return {
+          updateOne: {
+            filter: { _id: incident._id },
+            update: { $set: { slaStatus: currentSLAStatus, updatedAt: new Date() } }
+          }
+        }
       }
+      return null
+    }).filter(op => op !== null) as any[]
 
-      if (newStatus !== incident.slaStatus) {
-        await collection.updateOne(
-          { _id: incident._id },
-          { $set: { slaStatus: newStatus, updatedAt: new Date() } }
-        )
-      }
+    if (bulkOps.length > 0) {
+      await collection.bulkWrite(bulkOps)
     }
+
+    return updatedCount
   }
 }

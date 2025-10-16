@@ -60,15 +60,15 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // Always redirect to /tools after successful login
+      // Always redirect to /incident-management after successful login
       if (url === baseUrl || url === `${baseUrl}/`) {
-        return `${baseUrl}/tools`
+        return `${baseUrl}/incident-management`
       }
       // Allow relative callback URLs
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // Allow callback URLs on the same origin
       if (new URL(url).origin === baseUrl) return url
-      return `${baseUrl}/tools`
+      return `${baseUrl}/incident-management`
     },
     async jwt({ token, user }) {
       if (user) {

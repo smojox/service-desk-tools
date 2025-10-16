@@ -53,7 +53,9 @@ export const COLLECTIONS = {
   RESOURCE_PLANNER: 'resource_planner',
   INCIDENTS: 'incidents',
   COMPANIES: 'companies',
+  CONTACTS: 'contacts',
   SLA_DEFINITIONS: 'sla_definitions',
   PORTAL_USERS: 'portal_users',
   INCIDENT_TEMPLATES: 'incident_templates',
+  SAVED_QUERIES: 'saved_queries',
 } as const

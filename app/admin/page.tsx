@@ -13,8 +13,10 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { ArrowLeft, Plus, Pencil, Trash2, Users, Shield, Activity, Loader2 } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ArrowLeft, Plus, Pencil, Trash2, Users, Shield, Activity, Loader2, Layout, GripVertical } from "lucide-react"
 import { toast } from "sonner"
+import { WidgetConfig } from "@/lib/models/AppSettings"
 
 interface User {
   _id: string
@@ -47,7 +49,9 @@ export default function AdminPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
+  const [widgets, setWidgets] = useState<WidgetConfig[]>([])
   const [loading, setLoading] = useState(true)
+  const [widgetsLoading, setWidgetsLoading] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [createForm, setCreateForm] = useState<CreateUserForm>({
@@ -74,6 +78,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (session && session.user.permissions.admin) {
       fetchUsers()
+      fetchWidgets()
     }
   }, [session])
 
@@ -90,6 +95,48 @@ export default function AdminPage() {
       toast.error('Error fetching users')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchWidgets = async () => {
+    try {
+      const response = await fetch('/api/app-settings')
+      if (response.ok) {
+        const data = await response.json()
+        setWidgets(data.widgets)
+      } else {
+        toast.error('Failed to fetch widget settings')
+      }
+    } catch (error) {
+      toast.error('Error fetching widget settings')
+    } finally {
+      setWidgetsLoading(false)
+    }
+  }
+
+  const handleToggleWidget = async (widgetId: string) => {
+    const updatedWidgets = widgets.map(w =>
+      w.id === widgetId ? { ...w, enabled: !w.enabled } : w
+    )
+
+    setWidgets(updatedWidgets)
+
+    try {
+      const response = await fetch('/api/app-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ widgets: updatedWidgets })
+      })
+
+      if (response.ok) {
+        toast.success('Widget settings updated')
+      } else {
+        toast.error('Failed to update widget settings')
+        fetchWidgets() // Revert on error
+      }
+    } catch (error) {
+      toast.error('Error updating widget settings')
+      fetchWidgets() // Revert on error
     }
   }
 
@@ -228,7 +275,7 @@ export default function AdminPage() {
                   e.currentTarget.style.display = 'none'
                 }}
               />
-              <span className="text-gray-300 text-xl font-semibold">User Management</span>
+              <span className="text-gray-300 text-xl font-semibold">Admin Panel</span>
             </div>
             <div className="flex items-center space-x-2">
               <Badge variant="outline" className="text-white border-white">
@@ -245,15 +292,30 @@ export default function AdminPage() {
         <div className="max-w-6xl mx-auto">
           <Card className="border-0 bg-white/90 backdrop-blur-sm">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-gray-900 text-2xl flex items-center">
-                    <Users className="h-6 w-6 mr-2" />
+              <CardTitle className="text-gray-900 text-2xl">Administration</CardTitle>
+              <p className="text-gray-600 mt-1">Manage users, permissions, and system settings</p>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="users" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="users">
+                    <Users className="h-4 w-4 mr-2" />
                     User Management
-                  </CardTitle>
-                  <p className="text-gray-600 mt-1">Manage users and their permissions</p>
-                </div>
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  </TabsTrigger>
+                  <TabsTrigger value="widgets">
+                    <Layout className="h-4 w-4 mr-2" />
+                    Widget Configuration
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Users Tab */}
+                <TabsContent value="users" className="space-y-4">
+                  <div className="flex items-center justify-between pt-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">Users</h3>
+                      <p className="text-sm text-gray-600">Manage user accounts and permissions</p>
+                    </div>
+                    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="bg-teal-600 hover:bg-teal-700">
                       <Plus className="h-4 w-4 mr-2" />
@@ -360,15 +422,14 @@ export default function AdminPage() {
                     </form>
                   </DialogContent>
                 </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
+                  </div>
+
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -457,8 +518,56 @@ export default function AdminPage() {
                       ))}
                     </TableBody>
                   </Table>
-                </div>
-              )}
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Widgets Tab */}
+                <TabsContent value="widgets" className="space-y-4">
+                  <div className="pt-4">
+                    <h3 className="text-lg font-semibold mb-2">Widget Visibility</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Control which widgets are visible in the tools navigation. Disabled widgets will be hidden from all users.
+                    </p>
+                  </div>
+
+                  {widgetsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {widgets.map((widget) => (
+                        <div
+                          key={widget.id}
+                          className="flex items-center justify-between p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <GripVertical className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <div className="font-medium">{widget.name}</div>
+                              {widget.requiresPermission && (
+                                <div className="text-xs text-gray-500">
+                                  Requires permission: {widget.requiresPermission}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <Badge variant={widget.enabled ? "default" : "secondary"}>
+                              {widget.enabled ? "Visible" : "Hidden"}
+                            </Badge>
+                            <Switch
+                              checked={widget.enabled}
+                              onCheckedChange={() => handleToggleWidget(widget.id)}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>

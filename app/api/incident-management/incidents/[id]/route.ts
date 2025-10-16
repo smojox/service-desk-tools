@@ -5,7 +5,7 @@ import { IncidentModel, UpdateIncidentData } from '@/lib/models/Incident'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,7 +14,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const incident = await IncidentModel.getItemById(params.id)
+    const resolvedParams = await params
+    const incident = await IncidentModel.getItemById(resolvedParams.id)
 
     if (!incident) {
       return NextResponse.json({ error: 'Incident not found' }, { status: 404 })
@@ -29,7 +30,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -39,9 +40,10 @@ export async function PUT(
     }
 
     const body = await request.json()
+    const resolvedParams = await params
 
     // Get current incident to check if status is changing to resolved/closed
-    const currentIncident = await IncidentModel.getItemById(params.id)
+    const currentIncident = await IncidentModel.getItemById(resolvedParams.id)
     if (!currentIncident) {
       return NextResponse.json({ error: 'Incident not found' }, { status: 404 })
     }
@@ -54,7 +56,7 @@ export async function PUT(
       updateData.internalResolutionNotes = body.internalResolutionNotes
     }
 
-    const incident = await IncidentModel.updateItem(params.id, updateData)
+    const incident = await IncidentModel.updateItem(resolvedParams.id, updateData)
 
     if (!incident) {
       return NextResponse.json({ error: 'Failed to update incident' }, { status: 500 })
@@ -69,7 +71,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -78,7 +80,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const success = await IncidentModel.deleteItem(params.id)
+    const resolvedParams = await params
+    const success = await IncidentModel.deleteItem(resolvedParams.id)
 
     if (!success) {
       return NextResponse.json({ error: 'Failed to delete incident' }, { status: 500 })

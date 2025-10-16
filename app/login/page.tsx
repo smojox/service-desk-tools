@@ -38,9 +38,9 @@ export default function LoginPage() {
         // Get the updated session to check user role
         const session = await getSession()
         toast.success("Login successful!")
-        
-        // Redirect based on user role or to tools page
-        router.push("/tools")
+
+        // Redirect to incident management dashboard
+        router.push("/incident-management")
         router.refresh()
       }
     } catch (error) {
