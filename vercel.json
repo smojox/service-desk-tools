@@ -6,7 +6,7 @@
   "crons": [
     {
       "path": "/api/incident-management/incidents/update-sla-statuses",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
