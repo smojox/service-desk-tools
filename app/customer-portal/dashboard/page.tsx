@@ -14,11 +14,11 @@ interface PortalUser {
 
 interface Incident {
   _id: string
-  referenceNumber: string
-  title: string
+  ref: string
+  subject: string
   description: string
-  status: 'open' | 'in_progress' | 'waiting_customer' | 'waiting_vendor' | 'resolved' | 'closed'
-  priority: 'critical' | 'high' | 'medium' | 'low'
+  status: string
+  priority: string
   createdAt: string
   updatedAt: string
   assignedToName?: string
@@ -186,14 +186,14 @@ export default function CustomerDashboard() {
               {filteredIncidents.map((incident) => (
                 <Link
                   key={incident._id}
-                  href={`/customer-portal/incident/${incident.referenceNumber}`}
+                  href={`/customer-portal/incident/${incident.ref}`}
                   className="block p-6 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <span className="font-mono text-sm font-semibold text-gray-900">
-                          {incident.referenceNumber}
+                          {incident.ref}
                         </span>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(incident.status)}`}>
                           {incident.status.replace('_', ' ')}
@@ -203,7 +203,7 @@ export default function CustomerDashboard() {
                         </span>
                       </div>
                       <h3 className="text-lg font-medium text-gray-900 mb-1">
-                        {incident.title}
+                        {incident.subject}
                       </h3>
                       <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                         {incident.description}

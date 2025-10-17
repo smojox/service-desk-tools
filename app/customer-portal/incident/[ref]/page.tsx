@@ -14,22 +14,22 @@ interface PortalUser {
 
 interface Incident {
   _id: string
-  referenceNumber: string
-  title: string
+  ref: string
+  subject: string
   description: string
-  status: 'open' | 'in_progress' | 'waiting_customer' | 'waiting_vendor' | 'resolved' | 'closed'
-  priority: 'critical' | 'high' | 'medium' | 'low'
+  status: string
+  priority: string
   category: string
-  subCategory?: string
+  subcategory?: string
   createdAt: string
   updatedAt: string
   assignedToName?: string
-  timeline?: Array<{
-    type: string
+  customerUpdates?: Array<{
     content: string
     createdAt: string
-    createdByName: string
-    isPrivate: boolean
+    authorName: string
+    authorType: string
+    visibleToCustomer: boolean
   }>
 }
 
@@ -183,7 +183,7 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
               <div>
                 <div className="flex items-center space-x-3 mb-2">
                   <span className="font-mono text-lg font-bold text-gray-900">
-                    {incident.referenceNumber}
+                    {incident.ref}
                   </span>
                   <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(incident.status)}`}>
                     {incident.status.replace('_', ' ')}
@@ -193,11 +193,11 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
                   </span>
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {incident.title}
+                  {incident.subject}
                 </h2>
                 <div className="flex items-center space-x-4 text-sm text-gray-600">
                   <span>Category: {incident.category}</span>
-                  {incident.subCategory && <span>• {incident.subCategory}</span>}
+                  {incident.subcategory && <span>• {incident.subcategory}</span>}
                   {incident.assignedToName && <span>• Assigned to: {incident.assignedToName}</span>}
                 </div>
               </div>
@@ -213,9 +213,9 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Activity Timeline</h3>
             <div className="space-y-4">
-              {incident.timeline && incident.timeline.length > 0 ? (
-                incident.timeline
-                  .filter(item => !item.isPrivate)
+              {incident.customerUpdates && incident.customerUpdates.length > 0 ? (
+                incident.customerUpdates
+                  .filter(item => item.visibleToCustomer)
                   .map((item, index) => (
                     <div key={index} className="flex space-x-3">
                       <div className="flex-shrink-0">
@@ -227,14 +227,14 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
                       </div>
                       <div className="flex-1 bg-gray-50 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-gray-900">{item.createdByName}</span>
+                          <span className="font-medium text-gray-900">{item.authorName}</span>
                           <span className="text-sm text-gray-500">
                             {new Date(item.createdAt).toLocaleString()}
                           </span>
                         </div>
                         <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.content}</p>
                         <span className="inline-block mt-2 text-xs font-medium text-gray-500 uppercase">
-                          {item.type.replace('_', ' ')}
+                          {item.authorType}
                         </span>
                       </div>
                     </div>

@@ -28,9 +28,9 @@ export async function GET(request: NextRequest) {
       companyId: auth.companyId
     }
 
-    // If user can only see their own incidents, filter by contact
+    // If user can only see their own incidents, filter by reportedById
     if (!portalUser.canViewAllCompanyIncidents) {
-      query.contactId = auth.userId
+      query.reportedById = auth.userId
     }
 
     if (status) {

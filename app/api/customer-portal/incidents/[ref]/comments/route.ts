@@ -34,7 +34,7 @@ export async function POST(
     }
 
     // If user can't view all company incidents, verify it's their incident
-    if (!portalUser.canViewAllCompanyIncidents && incident.contactId?.toString() !== auth.userId) {
+    if (!portalUser.canViewAllCompanyIncidents && incident.reportedById?.toString() !== auth.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -44,28 +44,25 @@ export async function POST(
     }
 
     const body = await request.json()
-    const { content, isPrivate } = body
+    const { content } = body
 
     if (!content || !content.trim()) {
       return NextResponse.json({ error: 'Comment content is required' }, { status: 400 })
     }
 
-    // Add customer update to incident
+    // Add customer update
     const updatedIncident = await IncidentModel.addCustomerUpdate(
-      incident._id!.toString(),
+      incident._id!,
       content,
       auth.userId,
       portalUser.name,
-      isPrivate || false
+      'customer',
+      true // visibleToCustomer
     )
 
-    if (!updatedIncident) {
-      return NextResponse.json({ error: 'Failed to add comment' }, { status: 500 })
-    }
-
-    return NextResponse.json({ incident: updatedIncident }, { status: 201 })
+    return NextResponse.json({ incident: updatedIncident })
   } catch (error: any) {
-    console.error('Error adding portal comment:', error)
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
+    console.error('Error adding comment:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

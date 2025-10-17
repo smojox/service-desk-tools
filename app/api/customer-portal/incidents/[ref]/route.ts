@@ -34,7 +34,7 @@ export async function GET(
     }
 
     // If user can't view all company incidents, verify it's their incident
-    if (!portalUser.canViewAllCompanyIncidents && incident.contactId?.toString() !== auth.userId) {
+    if (!portalUser.canViewAllCompanyIncidents && incident.reportedById?.toString() !== auth.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 

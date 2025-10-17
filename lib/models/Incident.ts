@@ -201,6 +201,21 @@ const PRIORITY_MATRIX: Record<UrgencyLevel, Record<ImpactLevel, IncidentPriority
 }
 
 export function calculatePriority(urgency: UrgencyLevel, impact: ImpactLevel): IncidentPriority {
+  if (!urgency || !impact) {
+    console.error('calculatePriority called with undefined values:', { urgency, impact })
+    throw new Error(`Invalid urgency (${urgency}) or impact (${impact}) provided to calculatePriority`)
+  }
+
+  if (!PRIORITY_MATRIX[urgency]) {
+    console.error('Invalid urgency level:', urgency, 'Available:', Object.keys(PRIORITY_MATRIX))
+    throw new Error(`Invalid urgency level: ${urgency}`)
+  }
+
+  if (!PRIORITY_MATRIX[urgency][impact]) {
+    console.error('Invalid impact level:', impact, 'for urgency:', urgency, 'Available:', Object.keys(PRIORITY_MATRIX[urgency]))
+    throw new Error(`Invalid impact level: ${impact} for urgency: ${urgency}`)
+  }
+
   return PRIORITY_MATRIX[urgency][impact]
 }
 
