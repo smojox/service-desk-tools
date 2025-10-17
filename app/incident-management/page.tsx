@@ -7,7 +7,7 @@ import AppSidebar from "@/components/app-sidebar"
 export default function IncidentManagementPage() {
   return (
     <AuthWrapper>
-      <div className="min-h-screen bg-gray-100 flex">
+      <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/10 to-taranto-turquoise/5 flex">
         {/* Sidebar */}
         <AppSidebar selectedItem="incident-dashboard" />
 

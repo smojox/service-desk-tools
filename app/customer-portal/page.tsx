@@ -55,20 +55,20 @@ export default function CustomerPortalLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/10 to-taranto-turquoise/5 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="taranto-heading text-4xl text-taranto-turquoise mb-2">
             Customer Portal
           </h1>
-          <p className="text-gray-600">
+          <p className="taranto-body text-gray-600">
             Sign in to view and manage your support incidents
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="taranto-card-base bg-white shadow-taranto-elevated">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -80,7 +80,7 @@ export default function CustomerPortalLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="taranto-input-base border-2 border-gray-300 rounded-taranto focus:border-taranto-turquoise bg-white"
                 placeholder="your.email@company.com"
                 disabled={loading}
               />
@@ -97,14 +97,14 @@ export default function CustomerPortalLogin() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="taranto-input-base border-2 border-gray-300 rounded-taranto focus:border-taranto-turquoise bg-white pr-12"
                   placeholder="Enter your password"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-taranto-grey hover:text-taranto-turquoise transition-colors"
                   disabled={loading}
                 >
                   {showPassword ? (
@@ -118,10 +118,10 @@ export default function CustomerPortalLogin() {
 
             {message && (
               <div
-                className={`p-4 rounded-lg ${
+                className={`taranto-card-base ${
                   message.type === 'success'
-                    ? 'bg-green-50 text-green-800 border border-green-200'
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                    ? 'bg-taranto-green/10 text-taranto-green border-2 border-taranto-green'
+                    : 'bg-taranto-red/10 text-taranto-red border-2 border-taranto-red'
                 }`}
               >
                 {message.text}
@@ -131,22 +131,22 @@ export default function CustomerPortalLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="taranto-btn-base w-full bg-taranto-turquoise hover:bg-taranto-turquoise/90 text-white py-3 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 text-center">
+            <p className="taranto-body text-sm text-center">
               Sign in with your email and password to access your support portal.
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-sm text-gray-600">
-          <p>Need help? Contact your system administrator.</p>
+        <div className="mt-8 text-center">
+          <p className="taranto-body text-sm">Need help? Contact your system administrator.</p>
         </div>
       </div>
     </div>

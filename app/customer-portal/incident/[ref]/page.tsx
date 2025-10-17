@@ -110,32 +110,32 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
 
   const getStatusColor = (status: string) => {
     const colors = {
-      open: 'bg-blue-100 text-blue-800',
-      in_progress: 'bg-yellow-100 text-yellow-800',
-      waiting_customer: 'bg-orange-100 text-orange-800',
-      waiting_vendor: 'bg-purple-100 text-purple-800',
-      resolved: 'bg-green-100 text-green-800',
-      closed: 'bg-gray-100 text-gray-800'
+      open: 'bg-taranto-turquoise/10 text-taranto-turquoise border border-taranto-turquoise',
+      in_progress: 'bg-taranto-orange/10 text-taranto-orange border border-taranto-orange',
+      waiting_customer: 'bg-taranto-orange/10 text-taranto-orange border border-taranto-orange',
+      waiting_vendor: 'bg-taranto-orange/10 text-taranto-orange border border-taranto-orange',
+      resolved: 'bg-taranto-green/10 text-taranto-green border border-taranto-green',
+      closed: 'bg-taranto-grey/10 text-taranto-grey border border-taranto-grey'
     }
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+    return colors[status as keyof typeof colors] || 'bg-taranto-grey/10 text-taranto-grey border border-taranto-grey'
   }
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      critical: 'text-red-600',
-      high: 'text-orange-600',
-      medium: 'text-yellow-600',
-      low: 'text-green-600'
+      critical: 'text-taranto-red',
+      high: 'text-taranto-orange',
+      medium: 'text-taranto-orange',
+      low: 'text-taranto-green'
     }
-    return colors[priority as keyof typeof colors] || 'text-gray-600'
+    return colors[priority as keyof typeof colors] || 'text-taranto-grey'
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/10 to-taranto-turquoise/5 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading incident...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-taranto-turquoise mx-auto mb-4"></div>
+          <p className="taranto-body">Loading incident...</p>
         </div>
       </div>
     )
@@ -146,26 +146,26 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/10 to-taranto-turquoise/5">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Customer Portal</h1>
-              <p className="text-sm text-gray-600">{user?.companyName}</p>
+              <h1 className="taranto-heading text-2xl text-taranto-turquoise">Customer Portal</h1>
+              <p className="taranto-body text-sm">{user?.companyName}</p>
             </div>
             <div className="flex items-center space-x-4">
               <Link
                 href="/customer-portal/dashboard"
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="taranto-btn-base text-sm text-taranto-turquoise hover:text-taranto-turquoise/80"
               >
                 Back to Dashboard
               </Link>
-              <span className="text-sm text-gray-700">{user?.name}</span>
+              <span className="taranto-body text-sm">{user?.name}</span>
               <button
                 onClick={handleLogout}
-                className="text-sm text-red-600 hover:text-red-800 font-medium"
+                className="taranto-btn-base text-sm text-taranto-red hover:text-taranto-red/80"
               >
                 Logout
               </button>
@@ -176,23 +176,23 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="taranto-card-base bg-white shadow-lg overflow-hidden">
           {/* Incident Header */}
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
-                  <span className="font-mono text-lg font-bold text-gray-900">
+                  <span className="font-mono text-lg font-bold text-taranto-turquoise">
                     {incident.ref}
                   </span>
-                  <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(incident.status)}`}>
+                  <span className={`px-3 py-1 rounded-taranto text-sm font-medium ${getStatusColor(incident.status)}`}>
                     {incident.status.replace('_', ' ')}
                   </span>
                   <span className={`text-sm font-bold ${getPriorityColor(incident.priority)}`}>
                     {incident.priority.toUpperCase()} PRIORITY
                   </span>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="taranto-heading text-2xl mb-2">
                   {incident.subject}
                 </h2>
                 <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -203,15 +203,15 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
               </div>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Description</h3>
-              <p className="text-gray-900 whitespace-pre-wrap">{incident.description}</p>
+            <div className="bg-taranto-turquoise/5 p-4 rounded-taranto">
+              <h3 className="taranto-heading text-sm mb-2">Description</h3>
+              <p className="taranto-body whitespace-pre-wrap">{incident.description}</p>
             </div>
           </div>
 
           {/* Timeline */}
           <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Activity Timeline</h3>
+            <h3 className="taranto-heading text-lg mb-4">Activity Timeline</h3>
             <div className="space-y-4">
               {incident.customerUpdates && incident.customerUpdates.length > 0 ? (
                 incident.customerUpdates
@@ -219,42 +219,42 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
                   .map((item, index) => (
                     <div key={index} className="flex space-x-3">
                       <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="h-10 w-10 rounded-full bg-taranto-turquoise/20 flex items-center justify-center">
+                          <svg className="h-5 w-5 text-taranto-turquoise" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
                         </div>
                       </div>
-                      <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                      <div className="flex-1 bg-taranto-turquoise/5 rounded-taranto p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-gray-900">{item.authorName}</span>
-                          <span className="text-sm text-gray-500">
+                          <span className="taranto-heading text-sm">{item.authorName}</span>
+                          <span className="taranto-body text-sm text-gray-500">
                             {new Date(item.createdAt).toLocaleString()}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.content}</p>
-                        <span className="inline-block mt-2 text-xs font-medium text-gray-500 uppercase">
+                        <p className="taranto-body text-sm whitespace-pre-wrap">{item.content}</p>
+                        <span className="inline-block mt-2 text-xs font-medium text-taranto-grey uppercase">
                           {item.authorType}
                         </span>
                       </div>
                     </div>
                   ))
               ) : (
-                <p className="text-gray-500 text-center py-4">No activity yet</p>
+                <p className="taranto-body text-center py-4">No activity yet</p>
               )}
             </div>
           </div>
 
           {/* Add Comment */}
           {user?.canAddComments && ['open', 'in_progress', 'waiting_customer'].includes(incident.status) && (
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Comment</h3>
+            <div className="p-6 border-t border-gray-200 bg-taranto-turquoise/5">
+              <h3 className="taranto-heading text-lg mb-4">Add Comment</h3>
               <form onSubmit={handleSubmitComment}>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="taranto-input-base border-2 border-gray-300 rounded-taranto focus:border-taranto-turquoise bg-white"
                   placeholder="Type your comment here..."
                   disabled={submitting}
                 />
@@ -262,7 +262,7 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ ref: 
                   <button
                     type="submit"
                     disabled={submitting || !comment.trim()}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="taranto-btn-base bg-taranto-turquoise text-white px-6 py-2 hover:bg-taranto-turquoise/90 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? 'Submitting...' : 'Add Comment'}
                   </button>

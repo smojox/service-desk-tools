@@ -67,24 +67,24 @@ export default function CustomerDashboard() {
 
   const getStatusColor = (status: string) => {
     const colors = {
-      open: 'bg-blue-100 text-blue-800',
-      in_progress: 'bg-yellow-100 text-yellow-800',
-      waiting_customer: 'bg-orange-100 text-orange-800',
-      waiting_vendor: 'bg-purple-100 text-purple-800',
-      resolved: 'bg-green-100 text-green-800',
-      closed: 'bg-gray-100 text-gray-800'
+      open: 'bg-taranto-turquoise/10 text-taranto-turquoise border border-taranto-turquoise',
+      in_progress: 'bg-taranto-orange/10 text-taranto-orange border border-taranto-orange',
+      waiting_customer: 'bg-taranto-orange/10 text-taranto-orange border border-taranto-orange',
+      waiting_vendor: 'bg-taranto-orange/10 text-taranto-orange border border-taranto-orange',
+      resolved: 'bg-taranto-green/10 text-taranto-green border border-taranto-green',
+      closed: 'bg-taranto-grey/10 text-taranto-grey border border-taranto-grey'
     }
-    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+    return colors[status as keyof typeof colors] || 'bg-taranto-grey/10 text-taranto-grey border border-taranto-grey'
   }
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      critical: 'text-red-600',
-      high: 'text-orange-600',
-      medium: 'text-yellow-600',
-      low: 'text-green-600'
+      critical: 'text-taranto-red',
+      high: 'text-taranto-orange',
+      medium: 'text-taranto-orange',
+      low: 'text-taranto-green'
     }
-    return colors[priority as keyof typeof colors] || 'text-gray-600'
+    return colors[priority as keyof typeof colors] || 'text-taranto-grey'
   }
 
   const filteredIncidents = incidents.filter(incident => {
@@ -96,30 +96,30 @@ export default function CustomerDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/10 to-taranto-turquoise/5 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-taranto-turquoise mx-auto mb-4"></div>
+          <p className="taranto-body">Loading your dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/10 to-taranto-turquoise/5">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Customer Portal</h1>
-              <p className="text-sm text-gray-600">{user?.companyName}</p>
+              <h1 className="taranto-heading text-2xl text-taranto-turquoise">Customer Portal</h1>
+              <p className="taranto-body text-sm">{user?.companyName}</p>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">{user?.name}</span>
+              <span className="taranto-body text-sm">{user?.name}</span>
               <button
                 onClick={handleLogout}
-                className="text-sm text-red-600 hover:text-red-800 font-medium"
+                className="taranto-btn-base text-sm text-taranto-red hover:text-taranto-red/80"
               >
                 Logout
               </button>
@@ -135,30 +135,30 @@ export default function CustomerDashboard() {
           <div className="flex space-x-2">
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`taranto-btn-base px-4 py-2 ${
                 filter === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-taranto-turquoise text-white'
+                  : 'bg-white text-taranto-grey hover:bg-gray-50'
               }`}
             >
               All Incidents
             </button>
             <button
               onClick={() => setFilter('open')}
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`taranto-btn-base px-4 py-2 ${
                 filter === 'open'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-taranto-turquoise text-white'
+                  : 'bg-white text-taranto-grey hover:bg-gray-50'
               }`}
             >
               Open
             </button>
             <button
               onClick={() => setFilter('closed')}
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`taranto-btn-base px-4 py-2 ${
                 filter === 'closed'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-taranto-turquoise text-white'
+                  : 'bg-white text-taranto-grey hover:bg-gray-50'
               }`}
             >
               Closed
@@ -168,7 +168,7 @@ export default function CustomerDashboard() {
           {user?.canCreateIncidents && (
             <Link
               href="/customer-portal/create"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700"
+              className="taranto-btn-base bg-taranto-turquoise text-white px-4 py-2 hover:bg-taranto-turquoise/90"
             >
               Create New Incident
             </Link>
@@ -176,10 +176,10 @@ export default function CustomerDashboard() {
         </div>
 
         {/* Incidents List */}
-        <div className="bg-white rounded-lg shadow">
+        <div className="taranto-card-base bg-white shadow-md">
           {filteredIncidents.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              No incidents found.
+            <div className="p-8 text-center">
+              <p className="taranto-body">No incidents found.</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
@@ -187,25 +187,25 @@ export default function CustomerDashboard() {
                 <Link
                   key={incident._id}
                   href={`/customer-portal/incident/${incident.ref}`}
-                  className="block p-6 hover:bg-gray-50 transition-colors"
+                  className="block p-6 hover:bg-taranto-turquoise/5 transition-colors"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <span className="font-mono text-sm font-semibold text-gray-900">
+                        <span className="font-mono text-sm font-semibold text-taranto-turquoise">
                           {incident.ref}
                         </span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(incident.status)}`}>
+                        <span className={`px-2 py-1 rounded-taranto text-xs font-medium ${getStatusColor(incident.status)}`}>
                           {incident.status.replace('_', ' ')}
                         </span>
                         <span className={`text-xs font-medium ${getPriorityColor(incident.priority)}`}>
                           {incident.priority.toUpperCase()}
                         </span>
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-1">
+                      <h3 className="taranto-heading text-lg mb-1">
                         {incident.subject}
                       </h3>
-                      <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                      <p className="taranto-body text-sm line-clamp-2 mb-2">
                         {incident.description}
                       </p>
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
@@ -217,7 +217,7 @@ export default function CustomerDashboard() {
                     </div>
                     <div className="ml-4">
                       <svg
-                        className="h-5 w-5 text-gray-400"
+                        className="h-5 w-5 text-taranto-grey"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

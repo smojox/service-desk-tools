@@ -1,0 +1,38 @@
+{
+  "name": "taranto-ui",
+  "version": "1.0.0",
+  "description": "Complete UI component library for Taranto Systems applications",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "echo 'Build configured for production'",
+    "test": "echo 'Tests configured'"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "tailwind",
+    "design-system",
+    "taranto"
+  ],
+  "author": "Taranto Systems Development Team",
+  "license": "UNLICENSED",
+  "private": true,
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "lucide-react": "^0.263.1"
+  },
+  "dependencies": {
+    "tailwindcss": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0"
+  }
+}

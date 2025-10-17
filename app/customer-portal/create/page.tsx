@@ -113,36 +113,36 @@ export default function CreateIncidentPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/10 to-taranto-turquoise/5 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-taranto-turquoise mx-auto mb-4"></div>
+          <p className="taranto-body">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/10 to-taranto-turquoise/5">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Customer Portal</h1>
-              <p className="text-sm text-gray-600">{user?.companyName}</p>
+              <h1 className="taranto-heading text-2xl text-taranto-turquoise">Customer Portal</h1>
+              <p className="taranto-body text-sm">{user?.companyName}</p>
             </div>
             <div className="flex items-center space-x-4">
               <Link
                 href="/customer-portal/dashboard"
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="taranto-btn-base text-sm text-taranto-turquoise hover:text-taranto-turquoise/80"
               >
                 Back to Dashboard
               </Link>
-              <span className="text-sm text-gray-700">{user?.name}</span>
+              <span className="taranto-body text-sm">{user?.name}</span>
               <button
                 onClick={handleLogout}
-                className="text-sm text-red-600 hover:text-red-800 font-medium"
+                className="taranto-btn-base text-sm text-taranto-red hover:text-taranto-red/80"
               >
                 Logout
               </button>
@@ -153,14 +153,14 @@ export default function CreateIncidentPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Incident</h2>
+        <div className="taranto-card-base bg-white shadow-lg p-8">
+          <h2 className="taranto-heading text-2xl text-taranto-turquoise mb-6">Create New Incident</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Title <span className="text-red-500">*</span>
+              <label htmlFor="title" className="block text-sm font-medium text-taranto-grey mb-2">
+                Title <span className="text-taranto-red">*</span>
               </label>
               <input
                 type="text"
@@ -168,7 +168,7 @@ export default function CreateIncidentPage() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="taranto-input-base border-2 border-gray-300 rounded-taranto focus:border-taranto-turquoise bg-white"
                 placeholder="Brief summary of the issue"
                 disabled={submitting}
               />
@@ -176,8 +176,8 @@ export default function CreateIncidentPage() {
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description <span className="text-red-500">*</span>
+              <label htmlFor="description" className="block text-sm font-medium text-taranto-grey mb-2">
+                Description <span className="text-taranto-red">*</span>
               </label>
               <textarea
                 id="description"
@@ -185,7 +185,7 @@ export default function CreateIncidentPage() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="taranto-input-base border-2 border-gray-300 rounded-taranto focus:border-taranto-turquoise bg-white"
                 placeholder="Detailed description of the issue, including steps to reproduce if applicable"
                 disabled={submitting}
               />
@@ -193,14 +193,14 @@ export default function CreateIncidentPage() {
 
             {/* Priority */}
             <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="priority" className="block text-sm font-medium text-taranto-grey mb-2">
                 Priority
               </label>
               <select
                 id="priority"
                 value={formData.priority}
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="taranto-input-base border-2 border-gray-300 rounded-taranto focus:border-taranto-turquoise bg-white"
                 disabled={submitting}
               >
                 <option value="low">Low - Minor issue, no immediate impact</option>
@@ -212,14 +212,14 @@ export default function CreateIncidentPage() {
 
             {/* Category */}
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="category" className="block text-sm font-medium text-taranto-grey mb-2">
                 Category
               </label>
               <select
                 id="category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="taranto-input-base border-2 border-gray-300 rounded-taranto focus:border-taranto-turquoise bg-white"
                 disabled={submitting}
               >
                 <option value="General">General</option>
@@ -235,7 +235,7 @@ export default function CreateIncidentPage() {
 
             {/* Sub-Category */}
             <div>
-              <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="subCategory" className="block text-sm font-medium text-taranto-grey mb-2">
                 Sub-Category (Optional)
               </label>
               <input
@@ -243,7 +243,7 @@ export default function CreateIncidentPage() {
                 id="subCategory"
                 value={formData.subCategory}
                 onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="taranto-input-base border-2 border-gray-300 rounded-taranto focus:border-taranto-turquoise bg-white"
                 placeholder="e.g., Login Issues, Printer Problems, etc."
                 disabled={submitting}
               />
@@ -253,14 +253,14 @@ export default function CreateIncidentPage() {
             <div className="flex justify-end space-x-4 pt-4">
               <Link
                 href="/customer-portal/dashboard"
-                className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="taranto-btn-base px-6 py-3 border-2 border-taranto-grey text-taranto-grey hover:bg-gray-50"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="taranto-btn-base px-6 py-3 bg-taranto-turquoise text-white hover:bg-taranto-turquoise/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Creating...' : 'Create Incident'}
               </button>

@@ -1,10 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
 
 @layer utilities {
   .text-balance {
@@ -85,10 +84,41 @@ body {
 }
 
 @layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-poppins;
+  }
+
+  body {
+    @apply font-roboto;
+  }
+
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Taranto specific utilities */
+  .taranto-heading {
+    @apply font-poppins font-bold text-taranto-grey;
+  }
+
+  .taranto-body {
+    @apply font-roboto text-taranto-grey;
+  }
+
+  .taranto-btn-base {
+    @apply rounded-lg font-medium font-roboto inline-flex items-center gap-2 transition-all duration-200;
+  }
+
+  .taranto-input-base {
+    @apply px-4 py-2 w-full font-roboto transition-all duration-200 outline-none;
+  }
+
+  .taranto-card-base {
+    @apply rounded-lg p-4;
   }
 }

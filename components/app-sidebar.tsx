@@ -105,9 +105,9 @@ export default function AppSidebar({ selectedItem: initialSelectedItem }: AppSid
       id: "incident-management",
       label: "Incident Management",
       icon: Ticket,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      hoverBg: "hover:bg-red-100",
+      color: "text-taranto-turquoise",
+      bgColor: "bg-taranto-turquoise/10",
+      hoverBg: "hover:bg-taranto-turquoise/5",
       subItems: [
         { id: "incident-dashboard", label: "Ticket Dashboard", icon: BarChart3, path: "/incident-management" },
         { id: "incident-search", label: "Ticket Search", icon: Search, path: "/incident-management?tab=search" },
@@ -120,9 +120,9 @@ export default function AppSidebar({ selectedItem: initialSelectedItem }: AppSid
       id: "analytics",
       label: "Service Desk Analytics",
       icon: BarChart3,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      hoverBg: "hover:bg-blue-100",
+      color: "text-taranto-turquoise",
+      bgColor: "bg-taranto-turquoise/10",
+      hoverBg: "hover:bg-taranto-turquoise/5",
       path: "/analytics",
       disabled: !hasAnalyticsAccess
     },
@@ -130,9 +130,9 @@ export default function AppSidebar({ selectedItem: initialSelectedItem }: AppSid
       id: "appeal-codes",
       label: "Appeal Codes",
       icon: FileText,
-      color: "text-teal-600",
-      bgColor: "bg-teal-50",
-      hoverBg: "hover:bg-teal-100",
+      color: "text-taranto-turquoise",
+      bgColor: "bg-taranto-turquoise/10",
+      hoverBg: "hover:bg-taranto-turquoise/5",
       path: "/appeal-codes",
       disabled: !hasAppealCodesAccess
     },
@@ -140,45 +140,45 @@ export default function AppSidebar({ selectedItem: initialSelectedItem }: AppSid
       id: "jira",
       label: "JIRA Support Assists",
       icon: Bug,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      hoverBg: "hover:bg-purple-100",
+      color: "text-taranto-orange",
+      bgColor: "bg-taranto-orange/10",
+      hoverBg: "hover:bg-taranto-orange/5",
       path: "/jira"
     },
     {
       id: "support-dev",
       label: "Support Dev Items",
       icon: Code,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
-      hoverBg: "hover:bg-indigo-100",
+      color: "text-taranto-turquoise",
+      bgColor: "bg-taranto-turquoise/10",
+      hoverBg: "hover:bg-taranto-turquoise/5",
       path: "/support-dev-items"
     },
     {
       id: "priority-tracker",
       label: "Priority Tracker",
       icon: AlertTriangle,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-      hoverBg: "hover:bg-orange-100",
+      color: "text-taranto-orange",
+      bgColor: "bg-taranto-orange/10",
+      hoverBg: "hover:bg-taranto-orange/5",
       path: "/priority-tracker"
     },
     {
       id: "csi-tracker",
       label: "CSI Tracker",
       icon: TrendingUp,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      hoverBg: "hover:bg-blue-100",
+      color: "text-taranto-green",
+      bgColor: "bg-taranto-green/10",
+      hoverBg: "hover:bg-taranto-green/5",
       path: "/csi-tracker"
     },
     {
       id: "resource-planner",
       label: "Resource Planner",
       icon: CalendarDays,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      hoverBg: "hover:bg-green-100",
+      color: "text-taranto-green",
+      bgColor: "bg-taranto-green/10",
+      hoverBg: "hover:bg-taranto-green/5",
       path: "/resource-planner"
     }
   ]
@@ -196,7 +196,7 @@ export default function AppSidebar({ selectedItem: initialSelectedItem }: AppSid
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
       {/* Logo */}
-      <div className="p-4 border-b border-gray-200 bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500">
+      <div className="p-4 border-b border-gray-200 bg-gradient-to-br from-taranto-turquoise/20 via-taranto-turquoise/30 to-taranto-green/20">
         <div className="flex items-center space-x-3 cursor-pointer" onClick={() => router.push('/incident-management')}>
           <img
             src="/logo.png"
@@ -206,7 +206,7 @@ export default function AppSidebar({ selectedItem: initialSelectedItem }: AppSid
               e.currentTarget.style.display = 'none'
             }}
           />
-          <span className="font-semibold text-white">Service Desk</span>
+          <span className="taranto-heading text-white">Service Desk</span>
         </div>
       </div>
 
@@ -276,12 +276,12 @@ export default function AppSidebar({ selectedItem: initialSelectedItem }: AppSid
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center space-x-3 mb-3">
           <div className="flex-shrink-0">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-taranto-turquoise to-taranto-green flex items-center justify-center">
               <User className="h-4 w-4 text-white" />
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{session.user.name}</p>
+            <p className="taranto-heading text-sm truncate">{session.user.name}</p>
             <Badge variant="outline" className="text-xs">{session.user.role}</Badge>
           </div>
         </div>

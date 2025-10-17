@@ -1,63 +1,66 @@
-# 🛠️ Service Desk Tools Hub v2.0
+# 🎫 Taranto Service Desk Management System v2.1
 
-[![Release](https://img.shields.io/badge/release-v2.0-green.svg)](https://github.com/smojox/service-desk-analytics-taranto/releases/tag/v2.0)
+[![Release](https://img.shields.io/badge/release-v2.1-00ABC8.svg)](https://github.com/smojox/service-desk-analytics-taranto/releases/tag/v2.1)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 [![NextAuth.js](https://img.shields.io/badge/NextAuth.js-4.24-purple.svg)](https://next-auth.js.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-6.18-green.svg)](https://www.mongodb.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-38B2AC.svg)](https://tailwindcss.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-00ABC8.svg)](https://tailwindcss.com/)
 
-A comprehensive service desk tools hub built for Taranto, featuring secure authentication, powerful analytics, ticket management utilities, and administrative tools. Perfect for service desk managers, IT directors, and stakeholders who need streamlined access to service desk operations with role-based security.
+A modern, full-featured service desk management system built for Taranto. Complete incident lifecycle management with customer portal, SLA tracking, multi-company support, and powerful analytics. Built with the Taranto brand identity featuring turquoise, green, and professional design throughout.
 
 ## 🎯 Key Features
 
-### 📈 **Real-time Analytics Dashboard**
-- **Live Metrics**: Total tickets, open/closed counts, average resolution time, SLA compliance
+### 🎫 **Complete Incident Management**
+- **Full Ticket Lifecycle**: Create, view, update, and resolve incidents with comprehensive tracking
+- **Multi-company Support**: Manage incidents across multiple companies with isolated data
+- **SLA Tracking**: Automated SLA monitoring with pause/resume when tickets go on hold
+- **Priority Matrix**: Flexible priority calculation based on urgency and impact
+- **Status Workflow**: Complete incident lifecycle from New → Resolved → Closed
+- **Rich Comments**: Customer updates and internal notes with full conversation history
+- **Assignment Management**: Assign incidents to team members with notification support
+- **Search & Filter**: Advanced filtering by status, priority, company, assignee, SLA status
+- **Saved Queries**: Save and share common filter combinations for quick access
+- **Batch Operations**: Update multiple incidents simultaneously
+
+### 🌐 **Customer Portal**
+- **Self-Service Portal**: Secure portal for customers to view and manage their incidents
+- **Password Authentication**: Robust login system with per-contact credentials
+- **Incident Viewing**: Customers see only their company's incidents with full details
+- **Comment System**: Two-way communication between customers and support staff
+- **Status Tracking**: Real-time status updates with color-coded Taranto badges
+- **Incident Creation**: Portal users can create new incidents with full form validation
+- **Company Isolation**: Automatic data filtering ensures customers only see their own data
+- **Responsive Design**: Mobile-friendly interface for on-the-go access
+
+### 📊 **Dashboard & Analytics**
+- **Real-time Statistics**: Live incident counts, SLA compliance, priority breakdown
+- **Visual KPIs**: Color-coded metrics with Taranto brand colors (turquoise, green, orange, red)
+- **Interactive Charts**: Status breakdown, priority distribution, company volumes
+- **High Priority Alerts**: Dedicated section for critical and high-priority incidents
+- **Top Companies**: Track incident volume by customer company
+- **SLA Performance**: Within SLA, At Risk, and Breached incident tracking
+- **Trend Analysis**: Month-over-month performance tracking
+
+### 🏢 **Company & Contact Management**
+- **Company Profiles**: Manage customer companies with SLA definitions
+- **SLA Configuration**: Assign different SLA policies per company
+- **Contact Management**: Maintain customer contact records with portal access control
+- **Portal Enablement**: Enable/disable customer portal per company
+- **Compliance Tracking**: Monitor SLA compliance rates by company
+- **Primary Contacts**: Designate primary contacts for each company
+
+### 📈 **Advanced Analytics & Reporting** (Legacy)
+- **CSV Data Import**: Upload historical service desk data for analysis
+- **Monthly Reviews**: Detailed performance breakdowns by company and SDM
 - **Interactive Charts**: Monthly ticket volume trends with 7-month historical view
-- **Visual KPIs**: Color-coded metrics with trend indicators and hover details
-- **Performance Tracking**: Real-time updates as data changes
+- **Professional Exports**: PDF reports with charts, metrics, and professional formatting
+- **Excel Exports**: Detailed monthly review data for further analysis
 
-### 🎪 **SDM Monthly Reviews**
-- **Modal-based Interface**: Streamlined review process without losing dashboard context
-- **Company Analysis**: Detailed performance breakdown by company
-- **SLA Trending**: Month-over-month SLA comparisons with visual indicators
-- **RAG Status Management**: Red/Amber/Green classifications with comment tracking
-- **Ticket Type Breakdown**: Individual counts for Incidents, Service Requests, Problems, and Others
-
-### 🔍 **Advanced Filtering & Search**
-- **Multi-dimensional Filtering**: Filter by SDM, Company, and custom date ranges
-- **Smart Dropdowns**: Dynamic company filtering based on SDM selection
-- **Contextual Charts**: Monthly charts respect SDM/company filters while preserving historical context
-- **Clear Filters**: Easy reset functionality for quick data exploration
-
-### 📊 **Professional Exports**
-- **PDF Service Reviews**: Comprehensive reports with charts, metrics, and professional formatting
-- **Page Selection**: Choose specific pages to include in PDF exports with customizable options
-- **Detailed Analysis Pages**: Open Incidents/Service Requests with pagination, Problem Records with JIRA references
-- **Age Breakdown Charts**: Breakdown by Age of Ticket with vertical date formatting (MMM/YY)
-- **Escalation Process Integration**: Automated inclusion of escalation documentation
-- **Excel Data Export**: Detailed monthly review data for further analysis
-- **Print-ready Reports**: Formatted for stakeholder presentations and archival
-
-### 🤖 **AI-Powered Insights**
-- **Pattern Recognition**: Intelligent analysis of ticket trends and anomalies
-- **Performance Recommendations**: AI-generated suggestions for process improvement
-- **Predictive Analytics**: Forecasting based on historical data patterns
-- **Executive Summaries**: High-level insights for management reporting
-
-### 🔧 **Service Desk Tools**
-- **Appeal Code Management**: Validate and generate appeal codes for different notice types
-- **Code Validation**: Real-time validation of 6-character appeal codes with detailed feedback
-- **Bulk Code Export**: Generate CSV files with appeal codes for date ranges
-- **Notice Type Support**: Support for 10 different notice types (Parking, Bus Lane, RUCA, etc.)
+### 🔧 **Additional Tools**
+- **Appeal Code Management**: Validate and generate appeal codes for parking/enforcement notices
+- **Freshdesk Integration**: Real-time integration with Freshdesk API for ticket management
 - **Tools Hub**: Centralized access to additional service desk utilities
-
-### 🌐 **Freshdesk Integration**
-- **Live Ticket Updates**: Real-time integration with Freshdesk API for ticket management
-- **Custom Field Updates**: Update SLA status and custom fields directly from the dashboard
-- **Private Notes**: Automatically add private notes when SLA overrides are applied
-- **Secure Authentication**: Basic authentication with API key management
-- **Error Handling**: Comprehensive error handling with user-friendly feedback
 
 ### 🔐 **Authentication & Security** (New in v2.0)
 - **Secure Login System**: NextAuth.js v4 with credential-based authentication
@@ -123,102 +126,130 @@ npm start
 
 ### 1. **Authentication & Access**
 - **First Login**: Navigate to http://localhost:3000 and initialize admin user
-- **User Management**: Admin users can create and manage additional users
+- **User Management**: Admin users can create and manage staff user accounts
 - **Role Assignment**: Configure user roles (Admin, User, Viewer) and permissions
 - **Secure Access**: All tools require authentication and appropriate permissions
 
-### 2. **Tools Hub Navigation** 
-- **Main Dashboard**: Central landing page showing available tools
-- **Permission-Based Access**: Tools appear enabled/disabled based on user permissions
-- **User Profile**: View current user information and role in the header
-- **Admin Panel**: Access user management (admin users only)
+### 2. **Incident Management** (Primary Function)
+- **Dashboard**: View all incidents with real-time statistics and filtering
+- **Create Incidents**: Quick incident creation with full form validation
+- **View/Edit Incidents**: Click any incident to view details and make updates
+- **Status Management**: Update status, priority, assignee, and other fields
+- **Comments & Notes**: Add customer updates (visible in portal) or internal notes (staff only)
+- **SLA Tracking**: Monitor SLA compliance with automatic calculations
+- **Search & Filter**: Advanced filtering by status, priority, company, assignee, SLA
+- **Saved Queries**: Save filter combinations for quick access
 
-### 3. **Service Desk Analytics**
-- **Access Control**: Requires `analytics` permission
-- **CSV Upload**: Upload service desk data for analysis
-- **Real-time Filtering**: Filter by SDMs, companies, or time periods
-- **Interactive Charts**: Hover over charts for detailed data points
-- **Export Capabilities**: Generate PDF reports and Excel exports
+### 3. **Customer Portal Management**
+- **Company Setup**: Create companies and assign SLA definitions
+- **Contact Management**: Add customer contacts with portal access
+- **Portal Credentials**: Set passwords for contacts to access customer portal
+- **Access Control**: Enable/disable portal access per company and per contact
+- **Incident Permissions**: Control which contacts can create incidents vs. view only
 
-### 4. **Appeal Code Management**
-- **Access Control**: Requires `appealCodes` permission  
-- **Code Validation**: Real-time validation with detailed feedback
-- **Bulk Generation**: Create appeal codes for date ranges
-- **CSV Export**: Export codes for all notice types
+### 4. **Customer Portal (Customer-Facing)**
+- **Portal Login**: Customers log in at `/customer-portal` with their credentials
+- **View Incidents**: See all incidents for their company with full details
+- **Add Comments**: Submit comments and updates on their tickets
+- **Create Incidents**: Portal-enabled contacts can create new incidents
+- **Status Tracking**: Monitor incident progress with color-coded status badges
 
-### 5. **Administrative Functions**
-- **User Management**: Create, edit, and delete user accounts
-- **Permission Control**: Configure granular access to tools
-- **Role Management**: Assign Admin, User, or Viewer roles
-- **Account Status**: Enable/disable user accounts
+### 5. **Additional Tools**
+- **Service Desk Analytics**: Upload CSV data for historical analysis and reporting
+- **Appeal Code Management**: Validate and generate parking/enforcement appeal codes
+- **Admin Panel**: User management and system configuration
 
-## 📊 Data Requirements
+## 📊 Data Model
 
-The dashboard expects CSV files with the following key fields:
+The incident management system uses MongoDB to store all incident data:
 
-### Required Fields
-- **ticketId**: Unique ticket identifier
-- **subject**: Ticket summary/title
-- **status**: Current ticket status (Open, Resolved, Closed, etc.)
-- **priority**: Ticket priority level
-- **createdTime**: Ticket creation timestamp
-- **companyName**: Customer company name
-- **sdm**: Service Desk Manager assignment
+### Incident Schema
+- **ref**: Auto-generated reference number (e.g., INC-0001234)
+- **subject**: Incident title/summary
+- **description**: Detailed description of the issue
+- **status**: Current status (new, acknowledged, in_progress, on_hold, waiting_customer, waiting_vendor, resolved, cancelled, closed)
+- **priority**: Calculated priority (critical, high, medium, low)
+- **urgency**: Customer-specified urgency level
+- **impact**: Business impact level
+- **category**: Incident category (Hardware, Software, Network, etc.)
+- **subcategory**: Optional subcategory for detailed classification
 
-### SLA & Performance Fields
-- **resolutionStatus**: SLA compliance status ('Within SLA', 'SLA Violated')
-- **resolutionTimeHrs**: Time to resolution in hours
-- **dueByTime**: SLA due date/time
+### Company & Contact Management
+- **companyId**: Reference to customer company
+- **companyName**: Company name for display
+- **reportedByName**: Contact who reported the incident
+- **reportedByEmail**: Contact email address
+- **assignedToId**: Staff user assigned to incident
+- **assignedToName**: Assigned staff member name
 
-### Additional Fields
-- **type**: Ticket type (Incident, Service Request, Problem, etc.)
-- **agent**: Assigned agent/technician
-- **group**: Support group assignment
+### SLA & Performance Tracking
+- **slaName**: SLA definition name (e.g., "Standard 8x5", "Premium 24x7")
+- **responseByTime**: SLA response deadline
+- **dueByTime**: SLA resolution deadline
+- **slaStatus**: Current SLA status (within_sla, at_risk, breached)
+- **onHoldTime**: Duration ticket was on hold (excluded from SLA)
 
-> 📁 **Sample Data**: Check `/public/testfiles/` for example CSV format
+### Collaboration & History
+- **customerUpdates**: Array of public updates visible in customer portal
+- **internalNotes**: Array of private notes visible only to staff
+- **linkedFreshdeskTickets**: Integration with external Freshdesk tickets
+- **linkedJiraTickets**: Integration with JIRA issues
+- **viewCount**: Number of times incident was viewed
+- **reopenCount**: Number of times incident was reopened
+- **escalationLevel**: Current escalation level
+
+> 💾 **Database**: All data stored in MongoDB with automatic indexing and validation
 
 ## 🏗️ Project Structure
 
 ```
-service-desk-analytics-taranto/
+taranto-service-desk/
 ├── app/                     # Next.js app directory
-│   ├── page.tsx            # Root page (redirects to tools)
-│   ├── tools/              # Main tools hub landing page
-│   ├── analytics/          # Service desk analytics dashboard
-│   ├── appeal-codes/       # Appeal code management tool
-│   ├── login/              # Authentication login page
+│   ├── page.tsx            # Root page (redirects to incident-management)
+│   ├── incident-management/ # Primary incident management dashboard
+│   ├── customer-portal/    # Customer-facing portal
+│   │   ├── page.tsx       # Portal login page
+│   │   ├── dashboard/     # Customer incident list
+│   │   ├── create/        # Customer incident creation
+│   │   └── incident/[ref]/ # Customer incident detail view
+│   ├── login/              # Staff authentication login page
 │   ├── admin/              # Admin user management panel
-│   ├── monthly-review/     # Review page (legacy)
+│   ├── analytics/          # Historical analytics dashboard (legacy)
+│   ├── appeal-codes/       # Appeal code management tool
 │   └── api/               # API routes
 │       ├── auth/          # NextAuth.js authentication
 │       ├── users/         # User management API
-│       └── freshdesk/     # Freshdesk API integration
+│       ├── incident-management/ # Incident CRUD operations
+│       │   ├── incidents/ # Incident endpoints
+│       │   ├── companies/ # Company management
+│       │   ├── contacts/  # Contact management
+│       │   └── sla-definitions/ # SLA configuration
+│       ├── customer-portal/ # Customer portal API
+│       │   ├── auth/      # Customer authentication
+│       │   └── incidents/ # Customer incident access
+│       └── freshdesk/     # Freshdesk API integration (optional)
 ├── components/             # React components
 │   ├── ui/                # Base UI components (shadcn/ui)
+│   ├── incident-management-widget.tsx # Main incident dashboard
+│   ├── app-sidebar.tsx    # Navigation sidebar with Taranto branding
 │   ├── charts/            # Chart components (Recharts)
-│   ├── modals/            # Modal dialogs
-│   ├── csv-upload.tsx     # CSV upload handler
-│   ├── pdf-export.tsx     # PDF generation
-│   └── ppt-export.tsx     # PowerPoint export
+│   └── modals/            # Modal dialogs
 ├── lib/                   # Core utilities
-│   ├── models/            # Database models
-│   │   └── User.ts       # User model with MongoDB integration
+│   ├── models/            # MongoDB models
+│   │   ├── User.ts       # Staff user accounts
+│   │   ├── Incident.ts   # Incident schema
+│   │   ├── Company.ts    # Company/customer schema
+│   │   ├── Contact.ts    # Customer contact schema
+│   │   └── SLADefinition.ts # SLA policy schema
 │   ├── auth-config.ts     # NextAuth.js configuration
 │   ├── mongodb.ts         # MongoDB connection client
-│   ├── csv-parser.ts      # Data parsing logic
-│   ├── data-processor.ts  # Analytics engine
-│   ├── freshdesk-api.ts   # Freshdesk API client
-│   ├── freshdesk-client.ts # Frontend Freshdesk client
 │   └── utils.ts           # Shared utilities
 ├── middleware.ts           # Route protection middleware
-├── docs/                  # Documentation
-│   ├── screenshots/       # UI screenshots with index
-│   ├── USER_MANUAL.md     # Comprehensive user manual
-│   └── Visual_User_Guide.pdf # Visual guide
+├── Taranto-UI/            # Taranto brand design system
+│   └── taranto-setup-instructions.md
 └── public/                # Static assets
-    ├── testfiles/         # Sample data
-    ├── templates/         # Export templates
-    └── branding/          # Logo and assets
+    ├── logo.png           # Taranto logo
+    └── testfiles/         # Sample data (legacy)
 ```
 
 ## 🛠️ Technology Stack
@@ -226,7 +257,7 @@ service-desk-analytics-taranto/
 - **Frontend**: Next.js 15 + TypeScript + React 18
 - **Authentication**: NextAuth.js v4.24.11 with JWT sessions
 - **Database**: MongoDB 6.18+ with native driver
-- **Styling**: Tailwind CSS + shadcn/ui components
+- **Styling**: Tailwind CSS + shadcn/ui components + **Taranto UI Branding**
 - **Charts**: Recharts for interactive visualizations
 - **Data Processing**: Custom analytics engine with TypeScript
 - **State Management**: React hooks with optimized performance
@@ -244,16 +275,25 @@ The dashboard uses a comprehensive SLA calculation that handles:
 - **Override Support**: Manual SLA adjustments through the UI
 - **Historical Accuracy**: Consistent calculations across dashboard and reviews
 
-## 🎨 UI Components
+## 🎨 UI Components & Branding
 
-Built with modern, accessible components:
+Built with modern, accessible components and Taranto brand identity:
 
+### **Taranto UI Design System**
+- **Brand Colors**: Turquoise (#00ABC8) primary, Green (#80BC00), Orange (#f05423), Red (#dc2626), Grey (#4d4d4f)
+- **Typography**: Poppins for headings, Roboto for body text
+- **Consistent Styling**: Custom utility classes for buttons, inputs, cards, and badges
+- **Color-coded Status**: Visual status indicators using brand colors throughout the application
+- **Professional Aesthetics**: Clean, modern interface aligned with Taranto brand guidelines
+
+### **Component Features**
 - **Responsive Layout**: Mobile-first design with Tailwind CSS
-- **Interactive Charts**: Hover states and clickable elements
+- **Interactive Charts**: Hover states and clickable elements with Taranto color scheme
 - **Modal Dialogs**: Overlay interfaces that preserve context
-- **Form Controls**: Accessible dropdowns, inputs, and buttons
+- **Form Controls**: Accessible dropdowns, inputs, and buttons with Taranto styling
 - **Loading States**: Smooth loading indicators and skeleton screens
 - **Toast Notifications**: User feedback for actions and errors
+- **Branded Badges**: Status, priority, and SLA badges with Taranto colors
 
 ## 🔧 Configuration
 
@@ -337,9 +377,42 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **🤖 Generated with [Claude Code](https://claude.ai/code)**
 
-**v2.0 Release** - August 2025 | Service Desk Tools Hub with Authentication
+**v2.1 Release** - January 2025 | Taranto Service Desk Management System with Incident Management & Customer Portal
 
-## 🔄 Version 2.0 Release Notes (Major Update)
+## 🔄 Version 2.1 Release Notes (Latest Update)
+
+### 🎨 **Taranto UI Branding (v2.1)**
+- **Complete Brand Identity**: Full application rebrand with Taranto color scheme and typography
+- **Custom Design System**: Taranto-specific utility classes for consistent styling
+- **Color Palette**: Turquoise, Green, Orange, Red, and Grey brand colors throughout
+- **Typography Update**: Poppins for headings, Roboto for body text via Google Fonts
+- **Status Color Coding**: Consistent color-coded statuses, priorities, and SLA indicators
+- **Customer Portal Branding**: Full Taranto styling applied to customer-facing portal
+- **Incident Management**: Updated dashboard with Taranto colors and components
+- **Login Experience**: Branded login pages with Taranto gradient backgrounds
+- **Sidebar Navigation**: Turquoise/green gradient header with brand colors for menu items
+
+### 🎯 **Customer Portal Features (v2.1)**
+- **Password Authentication**: Secure login system for portal users
+- **Incident Viewing**: Customers can view their incidents with full details
+- **Comment System**: Customers can add comments and updates to their tickets
+- **Status Tracking**: Real-time status updates with color-coded badges
+- **Company Isolation**: Secure data isolation per company
+- **Contact Management**: Portal access control via contact records
+- **Responsive Design**: Mobile-friendly customer portal interface
+
+### 🎫 **Incident Management System (v2.1)**
+- **Full CRUD Operations**: Create, read, update, and delete incidents
+- **SLA Tracking**: Automated SLA monitoring with pause/resume on hold status
+- **Company Management**: Multi-company support with SLA definitions per company
+- **Contact Integration**: Link incidents to company contacts
+- **Status Workflow**: Complete incident lifecycle management
+- **Priority & Urgency Matrix**: Flexible priority calculation
+- **Internal Notes**: Private notes visible only to staff
+- **Customer Updates**: Public updates visible in customer portal
+- **Saved Queries**: Save and share common filter combinations
+
+## 🔄 Version 2.0 Release Notes (Previous Major Update)
 
 ### 🚨 **Breaking Changes**
 - **Authentication Required**: All application access now requires user authentication

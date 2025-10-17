@@ -13,6 +13,11 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+  			'taranto-turquoise': '#00ABC8',
+  			'taranto-green': '#80BC00',
+  			'taranto-orange': '#f05423',
+  			'taranto-red': '#dc2626',
+  			'taranto-grey': '#4d4d4f',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -64,10 +69,15 @@ const config: Config = {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
+  		fontFamily: {
+  			'poppins': ['Poppins', 'sans-serif'],
+  			'roboto': ['Roboto', 'sans-serif'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			sm: 'calc(var(--radius) - 4px)',
+  			'taranto': '0.5rem',
   		},
   		keyframes: {
   			'accordion-down': {

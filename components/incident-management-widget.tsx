@@ -776,33 +776,33 @@ export default function IncidentManagementWidget() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'Critical': return 'bg-red-100 text-red-800'
-      case 'High': return 'bg-orange-100 text-orange-800'
-      case 'Medium': return 'bg-yellow-100 text-yellow-800'
-      case 'Low': return 'bg-green-100 text-green-800'
+      case 'Critical': return 'bg-taranto-red/10 text-taranto-red'
+      case 'High': return 'bg-taranto-orange/10 text-taranto-orange'
+      case 'Medium': return 'bg-taranto-orange/10 text-taranto-orange'
+      case 'Low': return 'bg-taranto-green/10 text-taranto-green'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'New': return 'bg-blue-100 text-blue-800'
-      case 'Acknowledged': return 'bg-cyan-100 text-cyan-800'
-      case 'In Progress': return 'bg-yellow-100 text-yellow-800'
-      case 'On Hold': return 'bg-orange-100 text-orange-800'
+      case 'New': return 'bg-taranto-turquoise/10 text-taranto-turquoise'
+      case 'Acknowledged': return 'bg-taranto-turquoise/20 text-taranto-turquoise'
+      case 'In Progress': return 'bg-taranto-orange/10 text-taranto-orange'
+      case 'On Hold': return 'bg-taranto-orange/10 text-taranto-orange'
       case 'Awaiting Customer': return 'bg-purple-100 text-purple-800'
-      case 'Resolved': return 'bg-green-100 text-green-800'
+      case 'Resolved': return 'bg-taranto-green/10 text-taranto-green'
       case 'Closed': return 'bg-gray-100 text-gray-800'
-      case 'Cancelled': return 'bg-red-100 text-red-800'
+      case 'Cancelled': return 'bg-taranto-red/10 text-taranto-red'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
 
   const getSLAStatusColor = (slaStatus: string) => {
     switch (slaStatus) {
-      case 'Within SLA': return 'text-green-600'
-      case 'At Risk': return 'text-orange-600'
-      case 'Breached': return 'text-red-600'
+      case 'Within SLA': return 'text-taranto-green'
+      case 'At Risk': return 'text-taranto-orange'
+      case 'Breached': return 'text-taranto-red'
       default: return 'text-gray-600'
     }
   }
@@ -855,7 +855,7 @@ export default function IncidentManagementWidget() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="taranto-heading flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -865,7 +865,7 @@ export default function IncidentManagementWidget() {
                   <X className="h-4 w-4 mr-1" />
                   Back
                 </Button>
-                <Ticket className="h-5 w-5 text-blue-600" />
+                <Ticket className="h-5 w-5 text-taranto-turquoise" />
                 {selectedIncident.ref}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
@@ -997,7 +997,7 @@ export default function IncidentManagementWidget() {
                           rel="noopener noreferrer"
                           className="inline-block"
                         >
-                          <Badge variant="outline" className="flex items-center gap-1 hover:bg-blue-50 cursor-pointer">
+                          <Badge variant="outline" className="flex items-center gap-1 hover:bg-taranto-turquoise/10 cursor-pointer">
                             <Ticket className="h-3 w-3" />
                             FD: {ticket}
                             <ExternalLink className="h-3 w-3" />
@@ -1012,7 +1012,7 @@ export default function IncidentManagementWidget() {
                           rel="noopener noreferrer"
                           className="inline-block"
                         >
-                          <Badge variant="outline" className="flex items-center gap-1 hover:bg-blue-50 cursor-pointer">
+                          <Badge variant="outline" className="flex items-center gap-1 hover:bg-taranto-turquoise/10 cursor-pointer">
                             <Ticket className="h-3 w-3" />
                             JIRA: {ticket}
                             <ExternalLink className="h-3 w-3" />
@@ -1118,7 +1118,7 @@ export default function IncidentManagementWidget() {
                   ) : (
                     <>
                       {selectedIncident.customerUpdates && selectedIncident.customerUpdates.map((update: any, index: number) => (
-                        <div key={update._id || update.id || `update-${index}`} className="bg-blue-50 p-3 rounded-lg">
+                        <div key={update._id || update.id || `update-${index}`} className="bg-taranto-turquoise/10 p-3 rounded-lg">
                           <div className="flex justify-between items-start mb-2">
                             <span className="font-medium text-sm">{update.authorName}</span>
                             <span className="text-xs text-gray-500">{formatDate(update.createdAt)}</span>
@@ -1205,7 +1205,7 @@ export default function IncidentManagementWidget() {
         <div className="flex justify-end items-center">
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="bg-taranto-turquoise hover:bg-taranto-turquoise/90 text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 New Incident
               </Button>
@@ -1350,7 +1350,7 @@ export default function IncidentManagementWidget() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Create Incident</Button>
+                  <Button type="submit" className="bg-taranto-turquoise hover:bg-taranto-turquoise/90 text-white">Create Incident</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -1372,32 +1372,32 @@ export default function IncidentManagementWidget() {
                   </Card>
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-2xl font-bold text-taranto-turquoise">
                         {(stats.byStatus['New'] || 0) + (stats.byStatus['Acknowledged'] || 0) + (stats.byStatus['In Progress'] || 0)}
                       </div>
                       <p className="text-sm text-muted-foreground">Open</p>
-                      <TrendingUp className="h-4 w-4 mx-auto mt-1 text-blue-600" />
+                      <TrendingUp className="h-4 w-4 mx-auto mt-1 text-taranto-turquoise" />
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-orange-600">{stats.slaCompliance.atRisk}</div>
+                      <div className="text-2xl font-bold text-taranto-orange">{stats.slaCompliance.atRisk}</div>
                       <p className="text-sm text-muted-foreground">At Risk</p>
-                      <AlertTriangle className="h-4 w-4 mx-auto mt-1 text-orange-600" />
+                      <AlertTriangle className="h-4 w-4 mx-auto mt-1 text-taranto-orange" />
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-red-600">{stats.slaCompliance.breached}</div>
+                      <div className="text-2xl font-bold text-taranto-red">{stats.slaCompliance.breached}</div>
                       <p className="text-sm text-muted-foreground">Breached</p>
-                      <AlertCircle className="h-4 w-4 mx-auto mt-1 text-red-600" />
+                      <AlertCircle className="h-4 w-4 mx-auto mt-1 text-taranto-red" />
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-green-600">{stats.slaCompliance.complianceRate.toFixed(1)}%</div>
+                      <div className="text-2xl font-bold text-taranto-green">{stats.slaCompliance.complianceRate.toFixed(1)}%</div>
                       <p className="text-sm text-muted-foreground">SLA Rate</p>
-                      <CheckCircle className="h-4 w-4 mx-auto mt-1 text-green-600" />
+                      <CheckCircle className="h-4 w-4 mx-auto mt-1 text-taranto-green" />
                     </CardContent>
                   </Card>
                 </div>
@@ -1407,7 +1407,7 @@ export default function IncidentManagementWidget() {
                   {/* Status Breakdown */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Status Breakdown</CardTitle>
+                      <CardTitle className="taranto-heading text-lg">Status Breakdown</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
@@ -1420,9 +1420,9 @@ export default function IncidentManagementWidget() {
                               <div className="w-32 bg-gray-200 rounded-full h-2">
                                 <div
                                   className={`h-2 rounded-full ${
-                                    status === 'Resolved' || status === 'Closed' ? 'bg-green-500' :
-                                    status === 'In Progress' ? 'bg-blue-500' :
-                                    status === 'On Hold' ? 'bg-orange-500' : 'bg-gray-500'
+                                    status === 'Resolved' || status === 'Closed' ? 'bg-taranto-green' :
+                                    status === 'In Progress' ? 'bg-taranto-turquoise' :
+                                    status === 'On Hold' ? 'bg-taranto-orange' : 'bg-gray-500'
                                   }`}
                                   style={{ width: `${(count / stats.total) * 100}%` }}
                                 />
@@ -1438,7 +1438,7 @@ export default function IncidentManagementWidget() {
                   {/* Priority Breakdown */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Priority Breakdown</CardTitle>
+                      <CardTitle className="taranto-heading text-lg">Priority Breakdown</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
@@ -1451,9 +1451,9 @@ export default function IncidentManagementWidget() {
                               <div className="w-32 bg-gray-200 rounded-full h-2">
                                 <div
                                   className={`h-2 rounded-full ${
-                                    priority === 'Critical' ? 'bg-red-500' :
-                                    priority === 'High' ? 'bg-orange-500' :
-                                    priority === 'Medium' ? 'bg-yellow-500' : 'bg-green-500'
+                                    priority === 'Critical' ? 'bg-taranto-red' :
+                                    priority === 'High' ? 'bg-taranto-orange' :
+                                    priority === 'Medium' ? 'bg-taranto-orange' : 'bg-taranto-green'
                                   }`}
                                   style={{ width: `${(count / stats.total) * 100}%` }}
                                 />
@@ -1471,15 +1471,15 @@ export default function IncidentManagementWidget() {
                 {incidents && incidents.filter(i => i.priority === 'Critical' || i.priority === 'High').length > 0 && (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <CardTitle className="taranto-heading text-lg flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-taranto-red" />
                         High Priority Incidents
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
                         {incidents && incidents.filter(i => i.priority === 'Critical' || i.priority === 'High').slice(0, 5).map((incident) => (
-                          <div key={incident._id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border-l-4 border-red-500 hover:bg-red-100 transition-colors">
+                          <div key={incident._id} className="flex items-center justify-between p-3 bg-taranto-red/10 rounded-lg border-l-4 border-taranto-red hover:bg-taranto-red/20 transition-colors">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <h4 className="font-mono font-semibold">{incident.ref}</h4>
@@ -1518,14 +1518,14 @@ export default function IncidentManagementWidget() {
                 {/* Top Companies */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Top Companies by Incident Volume</CardTitle>
+                    <CardTitle className="taranto-heading text-lg">Top Companies by Incident Volume</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       {stats.byCompany.slice(0, 5).map((item, index) => (
                         <div key={index} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-sm">
+                            <div className="w-8 h-8 rounded-full bg-taranto-turquoise/20 flex items-center justify-center text-taranto-turquoise font-semibold text-sm">
                               {index + 1}
                             </div>
                             <span className="font-medium">{item.companyName}</span>
@@ -1533,7 +1533,7 @@ export default function IncidentManagementWidget() {
                           <div className="flex items-center gap-2">
                             <div className="w-32 bg-gray-200 rounded-full h-2">
                               <div
-                                className="h-2 rounded-full bg-blue-500"
+                                className="h-2 rounded-full bg-taranto-turquoise"
                                 style={{ width: `${(item.count / stats.byCompany[0].count) * 100}%` }}
                               />
                             </div>
@@ -1554,7 +1554,7 @@ export default function IncidentManagementWidget() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg">Search & Filter Incidents</CardTitle>
+                    <CardTitle className="taranto-heading text-lg">Search & Filter Incidents</CardTitle>
                     <CardDescription>
                       Apply filters to find specific incidents. Save frequently used searches.
                     </CardDescription>
@@ -1723,9 +1723,9 @@ export default function IncidentManagementWidget() {
                             key={sla}
                             className={`cursor-pointer ${
                               searchFilters.slaStatus?.includes(sla)
-                                ? sla === 'Within SLA' ? 'bg-green-100 text-green-800' :
-                                  sla === 'At Risk' ? 'bg-orange-100 text-orange-800' :
-                                  'bg-red-100 text-red-800'
+                                ? sla === 'Within SLA' ? 'bg-taranto-green/10 text-taranto-green' :
+                                  sla === 'At Risk' ? 'bg-taranto-orange/10 text-taranto-orange' :
+                                  'bg-taranto-red/10 text-taranto-red'
                                 : 'bg-gray-200 text-gray-700'
                             }`}
                             onClick={() => toggleFilterArray('slaStatus', sla)}
@@ -1853,7 +1853,7 @@ export default function IncidentManagementWidget() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg">Customer Management</CardTitle>
+                    <CardTitle className="taranto-heading text-lg">Customer Management</CardTitle>
                     <CardDescription>Manage companies and their contacts</CardDescription>
                   </div>
                   <div className="flex items-center gap-3">
@@ -1917,13 +1917,13 @@ export default function IncidentManagementWidget() {
                             <Badge variant="secondary">{company.openIncidents}</Badge>
                           </TableCell>
                           <TableCell>
-                            <span className={company.slaComplianceRate >= 90 ? 'text-green-600 font-semibold' : company.slaComplianceRate >= 80 ? 'text-orange-600 font-semibold' : 'text-red-600 font-semibold'}>
+                            <span className={company.slaComplianceRate >= 90 ? 'text-taranto-green font-semibold' : company.slaComplianceRate >= 80 ? 'text-taranto-orange font-semibold' : 'text-taranto-red font-semibold'}>
                               {company.slaComplianceRate.toFixed(1)}%
                             </span>
                           </TableCell>
                           <TableCell>
                             {company.portalEnabled ? (
-                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <CheckCircle className="h-4 w-4 text-taranto-green" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-gray-400" />
                             )}
@@ -1965,7 +1965,7 @@ export default function IncidentManagementWidget() {
                           <TableCell>{contact.jobTitle || '-'}</TableCell>
                           <TableCell>
                             {contact.portalAccess ? (
-                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <CheckCircle className="h-4 w-4 text-taranto-green" />
                             ) : (
                               <AlertCircle className="h-4 w-4 text-gray-400" />
                             )}
@@ -1986,7 +1986,7 @@ export default function IncidentManagementWidget() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleDeleteContact(contact._id!, contact.name)}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                className="text-taranto-red hover:text-taranto-red hover:bg-taranto-red/10"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -2005,7 +2005,7 @@ export default function IncidentManagementWidget() {
           {currentTab === 'reporting' && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Reporting (Coming Soon)</CardTitle>
+                <CardTitle className="taranto-heading text-lg">Reporting (Coming Soon)</CardTitle>
                 <CardDescription>Advanced reporting and analytics features will be available here</CardDescription>
               </CardHeader>
               <CardContent className="text-center py-12">
@@ -2021,7 +2021,7 @@ export default function IncidentManagementWidget() {
           {currentTab === 'admin' && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Admin Panel</CardTitle>
+                <CardTitle className="taranto-heading text-lg">Admin Panel</CardTitle>
                 <CardDescription>Manage SLA definitions and system configuration</CardDescription>
               </CardHeader>
               <CardContent>
@@ -2107,7 +2107,7 @@ export default function IncidentManagementWidget() {
                               </TableCell>
                               <TableCell>
                                 {sla.active ? (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                  <CheckCircle className="h-4 w-4 text-taranto-green" />
                                 ) : (
                                   <AlertCircle className="h-4 w-4 text-gray-400" />
                                 )}
@@ -2474,11 +2474,11 @@ function ContactForm({ contact, companies, onSave, onCancel }: { contact: Contac
         </div>
 
         {formData.portalAccess && (
-          <div className="grid gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <Label htmlFor="portalPassword" className="font-semibold text-blue-900">
+          <div className="grid gap-2 p-4 bg-taranto-turquoise/10 rounded-lg border border-taranto-turquoise/30">
+            <Label htmlFor="portalPassword" className="font-semibold text-taranto-grey">
               Portal Password {contact ? '(leave blank to keep existing)' : '*'}
             </Label>
-            <p className="text-xs text-blue-700 mb-2">
+            <p className="text-xs text-taranto-grey mb-2">
               {contact
                 ? 'Enter a new password only if you want to change it. Leave blank to keep the existing password.'
                 : 'Set a password for this user to access the customer portal (minimum 6 characters).'}

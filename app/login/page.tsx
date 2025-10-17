@@ -53,25 +53,25 @@ export default function LoginPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-400 via-cyan-500 to-green-400 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-taranto-turquoise/20 via-taranto-turquoise/30 to-taranto-green/20 flex flex-col items-center justify-center p-6">
       {/* Logo above the card */}
       <div className="flex justify-center mb-8">
-        <img 
-          src="/logo.png" 
-          alt="Taranto Logo" 
+        <img
+          src="/logo.png"
+          alt="Taranto Logo"
           className="h-16 w-auto drop-shadow-lg"
           onError={(e) => {
             e.currentTarget.style.display = 'none'
           }}
         />
       </div>
-      
+
       <Card className="w-full max-w-md bg-white/90 backdrop-blur-sm border-0 shadow-2xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">
+          <CardTitle className="taranto-heading text-2xl text-taranto-turquoise">
             Sign In
           </CardTitle>
-          <p className="text-gray-600">
+          <p className="taranto-body">
             Access your Service Desk Tools
           </p>
         </CardHeader>
@@ -129,7 +129,7 @@ export default function LoginPage() {
             
             <Button
               type="submit"
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+              className="w-full bg-taranto-turquoise hover:bg-taranto-turquoise/90 text-white"
               disabled={isLoading}
             >
               {isLoading ? (
