@@ -502,12 +502,24 @@ export class IncidentModel {
       }
     }
 
-    if (updateData.assignedToId) {
-      updateDoc.assignedToId = new ObjectId(updateData.assignedToId)
+    // Handle assignedToId - empty string means unassigned
+    if (updateData.assignedToId !== undefined) {
+      if (updateData.assignedToId === '' || updateData.assignedToId === 'unassigned') {
+        updateDoc.assignedToId = undefined
+        updateDoc.assignedToName = undefined
+      } else {
+        updateDoc.assignedToId = new ObjectId(updateData.assignedToId)
+      }
     }
 
-    if (updateData.teamId) {
-      updateDoc.teamId = new ObjectId(updateData.teamId)
+    // Handle teamId
+    if (updateData.teamId !== undefined) {
+      if (updateData.teamId === '') {
+        updateDoc.teamId = undefined
+        updateDoc.teamName = undefined
+      } else {
+        updateDoc.teamId = new ObjectId(updateData.teamId)
+      }
     }
 
     // Handle status changes
